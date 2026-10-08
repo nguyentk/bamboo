@@ -4385,7 +4385,7 @@ ScriptEditor::ScriptEditor(const String &p_config_section, const String &p_cache
 
 	disk_changed = memnew(ConfirmationDialog);
 	{
-		disk_changed->set_title(TTRC("Files have been modified outside Godot"));
+		disk_changed->set_title(TTRC("Files have been modified outside Bamboo"));
 
 		VBoxContainer *vbc = memnew(VBoxContainer);
 		disk_changed->add_child(vbc);

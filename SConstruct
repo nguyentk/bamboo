@@ -58,6 +58,7 @@ import gles3_builders
 import glsl_builders
 import methods
 import scu_builders
+import version
 from misc.utility.color import is_stderr_color, print_error, print_info, print_warning
 from platform_methods import architecture_aliases, architectures, compatibility_platform_aliases
 
@@ -272,7 +273,7 @@ opts.Add(BoolVariable("werror", "Treat compiler warnings as errors", False))
 opts.Add("extra_suffix", "Custom extra suffix added to the base filename of all generated binary files", "")
 opts.Add("object_prefix", "Custom prefix added to the base filename of all generated object files", "")
 opts.Add(BoolVariable("vsproj", "Generate a Visual Studio solution", False))
-opts.Add("vsproj_name", "Name of the Visual Studio solution", "godot")
+opts.Add("vsproj_name", "Name of the Visual Studio solution", version.short_name)
 opts.Add("import_env_vars", "A comma-separated list of environment variables to copy from the outer environment.", "")
 opts.Add(BoolVariable("disable_exceptions", "Force disabling exception handling code", True))
 opts.Add(BoolVariable("disable_2d", "Disable 2D nodes for a smaller executable", False))
@@ -548,6 +549,9 @@ env.platform_apis = platform_apis
 env.editor_build = env["target"] == "editor"
 env.dev_build = env["dev_build"]
 env.debug_features = env["target"] in ["editor", "template_debug"]
+
+# BAMBOO: Prefix of output binaries (e.g. `bin/bamboo.macos.editor.arm64`), taken from `version.py`.
+env.binary_prefix = version.short_name
 
 if env["optimize"] == "auto":
     if env.dev_build:

@@ -1,5 +1,9 @@
 # Donors to the Godot Engine project
 
+> **Note (Bamboo Engine):** Bamboo Engine is based on Godot Engine. This file
+> lists the donors of the original upstream Godot Engine project and is kept
+> unchanged to preserve their attribution.
+
 Godot Engine is a non-profit project developed by a community of voluntary
 contributors, as well as occasional paid contributors thanks to the financial
 support of generous donors.

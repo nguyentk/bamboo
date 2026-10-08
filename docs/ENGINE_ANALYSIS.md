@@ -451,7 +451,7 @@ scons ... modules_enabled_by_default=no \
 | :--- | :--- |
 | Tên / version | `version.py` (`short_name`, `name`, `website`, `major/minor/patch`) → sinh `core/version_generated.gen.h`; macro `GODOT_VERSION_*` ở `core/version.h` |
 | Tên file project & thư mục data | `core/config/project_settings.cpp` (`project.godot`, `project.binary`, `override.cfg`), thư mục `.godot/` (grep `".godot"` trong `core/` và `editor/`), `user://` path trong `core/os/os.cpp` & `OS_*::get_data_path/get_godot_dir_name` |
-| Tên binary | `methods.py` / `platform/*/detect.py` (prefix `godot.<platform>.<target>…`), `vsproj_name` |
+| Tên binary | **Đã làm:** prefix lấy từ `version.short_name` qua `env.binary_prefix` (`SConstruct`), dùng trong `platform/{macos,linuxbsd,windows}/SCsub`, `platform/macos/platform_macos_builders.py`, `methods.py` (vsproj) → `bamboo.<platform>.<target>…` |
 | Icon / splash / logo | `main/splash.png`, `main/app_icon.png`, `platform/*/logo.svg`, `platform/*/run_icon.svg`, `misc/dist/*` (Info.plist, .desktop, `.ico`, html shell), `editor/icons/` |
 | Export templates / plist / manifest | `platform/*/export/*.cpp`, `platform/android/java/` (package `org.godotengine.godot` — đổi namespace Java là việc lớn), `misc/dist/macos_template.app` |
 | Web shell | `misc/dist/html/*.html`, `platform/web/js/engine/*.js` (`Engine`/`Godot` global) |
@@ -482,7 +482,7 @@ Lời khuyên: làm rebrand bằng **một commit tách riêng** + script (`misc
 
 6. **Cân nhắc `libgodot`** nếu Bamboo cần nhúng engine vào app host (launcher, tool pipeline, app native có sẵn): engine chạy như thư viện, host điều khiển vòng lặp.
 
-7. **Kiểm soát rủi ro**: bật `tests=yes` và chạy `bin/godot.* --test` trong CI sau mỗi lần rebase; dùng `werror=yes` + `compiledb=yes` cho static analysis.
+7. **Kiểm soát rủi ro**: bật `tests=yes` và chạy `bin/bamboo.* --test` trong CI sau mỗi lần rebase; dùng `werror=yes` + `compiledb=yes` cho static analysis.
 
 ---
 
@@ -495,5 +495,5 @@ scons platform=macos target=editor dev_build=yes compiledb=yes
 scons platform=macos target=template_release production=yes optimize=size_extra lto=full disable_3d=yes modules_enabled_by_default=no module_gdscript_enabled=yes module_freetype_enabled=yes module_text_server_fb_enabled=yes
 ```
 ```bash
-bin/godot.macos.editor.dev.arm64 --headless --dump-extension-api
+bin/bamboo.macos.editor.dev.arm64 --headless --dump-extension-api
 ```

@@ -1,5 +1,9 @@
 # Godot Engine authors
 
+> **Note (Bamboo Engine):** Bamboo Engine is based on Godot Engine. This file
+> lists the contributors of the original upstream Godot Engine project and is
+> kept unchanged to preserve their attribution.
+
 Godot Engine is developed by a community of voluntary contributors who
 contribute code, bug reports, documentation, translations, support, etc.,
 across multiple repositories.

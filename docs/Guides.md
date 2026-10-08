@@ -140,15 +140,15 @@ scons platform=linuxbsd target=editor dev_build=yes debug_symbols=yes compiledb=
 Binary nằm trong `bin/`, tên theo mẫu:
 
 ```
-godot.<platform>.<target>[.dev][.double].<arch>[.llvm][.console][.exe]
+bamboo.<platform>.<target>[.dev][.double].<arch>[.llvm][.console][.exe]
 ```
 
 | Lệnh | File sinh ra |
 | :--- | :--- |
-| macOS dev editor | `bin/godot.macos.editor.dev.arm64` |
-| Windows dev editor (MSVC) | `bin/godot.windows.editor.dev.x86_64.exe` + `.console.exe` |
-| Windows dev editor (LLVM-MinGW) | `bin/godot.windows.editor.dev.x86_64.llvm.exe` |
-| Linux dev editor | `bin/godot.linuxbsd.editor.dev.x86_64` |
+| macOS dev editor | `bin/bamboo.macos.editor.dev.arm64` |
+| Windows dev editor (MSVC) | `bin/bamboo.windows.editor.dev.x86_64.exe` + `.console.exe` |
+| Windows dev editor (LLVM-MinGW) | `bin/bamboo.windows.editor.dev.x86_64.llvm.exe` |
+| Linux dev editor | `bin/bamboo.linuxbsd.editor.dev.x86_64` |
 
 > **Mẹo:** SCons tự dùng số luồng = số CPU. Lần build đầu mất 15–60 phút tùy máy; các lần sau chỉ build lại phần thay đổi. Trên Windows, dùng bản `.console.exe` để thấy log trong terminal.
 
@@ -230,32 +230,32 @@ Hoặc dùng profile dùng chung cho team (thư mục `profiles/` chưa có tron
 ### 5.1 Mở Project Manager / Editor
 
 ```bash
-bin/godot.macos.editor.dev.arm64
+bin/bamboo.macos.editor.dev.arm64
 ```
 
 Mở thẳng editor cho một project:
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --path /path/to/game_project --editor
+bin/bamboo.macos.editor.dev.arm64 --path /path/to/game_project --editor
 ```
 
 Chạy game (không mở editor):
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --path /path/to/game_project
+bin/bamboo.macos.editor.dev.arm64 --path /path/to/game_project
 ```
 
 Chạy một scene cụ thể:
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --path /path/to/game_project res://scenes/test_level.tscn
+bin/bamboo.macos.editor.dev.arm64 --path /path/to/game_project res://scenes/test_level.tscn
 ```
 
 > Mẹo: tạo một project nhỏ `sandbox/` (ngoài repo hoặc trong `.gitignore`) chứa scene thử nghiệm để chạy nhanh khi debug.
 
 ### 5.2 Cờ dòng lệnh hữu ích khi debug
 
-Xem đầy đủ: `bin/godot.<...> --help` (định nghĩa trong `main/main.cpp`).
+Xem đầy đủ: `bin/bamboo.<...> --help` (định nghĩa trong `main/main.cpp`).
 
 | Cờ | Tác dụng |
 | :--- | :--- |
@@ -319,7 +319,7 @@ Luôn debug trên bản build có `dev_build=yes debug_symbols=yes`. Khi muốn 
       "name": "Bamboo: Project Manager",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/godot.macos.editor.dev.arm64",
+      "program": "${workspaceFolder}/bin/bamboo.macos.editor.dev.arm64",
       "args": ["--disable-crash-handler"],
       "cwd": "${workspaceFolder}",
       "preLaunchTask": "build-editor-dev"
@@ -328,7 +328,7 @@ Luôn debug trên bản build có `dev_build=yes debug_symbols=yes`. Khi muốn 
       "name": "Bamboo: Editor (sandbox project)",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/godot.macos.editor.dev.arm64",
+      "program": "${workspaceFolder}/bin/bamboo.macos.editor.dev.arm64",
       "args": ["--path", "${workspaceFolder}/../sandbox", "--editor", "--verbose", "--disable-crash-handler"],
       "cwd": "${workspaceFolder}"
     },
@@ -336,7 +336,7 @@ Luôn debug trên bản build có `dev_build=yes debug_symbols=yes`. Khi muốn 
       "name": "Bamboo: Run game (sandbox project)",
       "type": "lldb",
       "request": "launch",
-      "program": "${workspaceFolder}/bin/godot.macos.editor.dev.arm64",
+      "program": "${workspaceFolder}/bin/bamboo.macos.editor.dev.arm64",
       "args": ["--path", "${workspaceFolder}/../sandbox", "--verbose", "--disable-crash-handler"],
       "cwd": "${workspaceFolder}"
     }
@@ -344,7 +344,7 @@ Luôn debug trên bản build có `dev_build=yes debug_symbols=yes`. Khi muốn 
 }
 ```
 
-Trên Windows thay `"type": "cppvsdbg"` và `program` bằng `bin/godot.windows.editor.dev.x86_64.exe`; trên Linux đổi tên binary thành `godot.linuxbsd.editor.dev.x86_64`.
+Trên Windows thay `"type": "cppvsdbg"` và `program` bằng `bin/bamboo.windows.editor.dev.x86_64.exe`; trên Linux đổi tên binary thành `bamboo.linuxbsd.editor.dev.x86_64`.
 
 > **Lưu ý quan trọng:** Khi bấm **Run** trong editor, Godot **khởi chạy một process con** để chạy game. Debugger gắn vào editor sẽ **không** dừng ở breakpoint trong code game. Để debug code chạy trong game: dùng cấu hình "Run game" ở trên (chạy thẳng project), hoặc **attach** vào process con sau khi bấm Run.
 
@@ -353,12 +353,12 @@ Trên Windows thay `"type": "cppvsdbg"` và `program` bằng `bin/godot.windows.
 Dùng LLDB trực tiếp:
 
 ```bash
-lldb -- bin/godot.macos.editor.dev.arm64 --path ../sandbox --disable-crash-handler
+lldb -- bin/bamboo.macos.editor.dev.arm64 --path ../sandbox --disable-crash-handler
 ```
 
 Trong LLDB: `b Node::add_child`, `run`, `bt`, `frame variable`, `continue`.
 
-Dùng Xcode: **Debug → Attach to Process** (chọn `godot.macos.editor.dev.arm64`), hoặc tạo scheme "External Build System" trỏ tới binary. Xcode còn có **Metal Frame Capture** để debug GPU (xem §7.2).
+Dùng Xcode: **Debug → Attach to Process** (chọn `bamboo.macos.editor.dev.arm64`), hoặc tạo scheme "External Build System" trỏ tới binary. Xcode còn có **Metal Frame Capture** để debug GPU (xem §7.2).
 
 ### 6.3 Visual Studio (Windows)
 
@@ -370,7 +370,7 @@ Dùng Xcode: **Debug → Attach to Process** (chọn `godot.macos.editor.dev.arm
 ### 6.4 GDB (Linux)
 
 ```bash
-gdb --args bin/godot.linuxbsd.editor.dev.x86_64 --path ../sandbox --disable-crash-handler
+gdb --args bin/bamboo.linuxbsd.editor.dev.x86_64 --path ../sandbox --disable-crash-handler
 ```
 
 ### 6.5 Breakpoint hữu ích để bắt đầu
@@ -445,17 +445,17 @@ scons target=editor dev_build=yes tests=yes
 Chạy toàn bộ test:
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --test
+bin/bamboo.macos.editor.dev.arm64 --test
 ```
 
 Chạy theo bộ lọc (cú pháp doctest):
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --test --test-case="*String*"
+bin/bamboo.macos.editor.dev.arm64 --test --test-case="*String*"
 ```
 
 ```bash
-bin/godot.macos.editor.dev.arm64 --test --test-suite="[Navigation]*"
+bin/bamboo.macos.editor.dev.arm64 --test --test-suite="[Navigation]*"
 ```
 
 Thêm test mới: tạo file `tests/<khu-vực>/test_<tên>.h` theo mẫu các file hiện có (`TEST_CASE("[Tag] Mô tả") { CHECK(...); }`) và include vào `tests/test_main.cpp` nếu thư mục đó chưa được tự động gom.
