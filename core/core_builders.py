@@ -30,6 +30,12 @@ def version_info_builder(target, source, env):
 #define GODOT_VERSION_WEBSITE "{website}"
 #define GODOT_VERSION_DOCS_BRANCH "{docs_branch}"
 #define GODOT_VERSION_DOCS_URL "https://docs.godotengine.org/en/" GODOT_VERSION_DOCS_BRANCH
+#define BAMBOO_VERSION_MAJOR {bamboo_major}
+#define BAMBOO_VERSION_MINOR {bamboo_minor}
+#define BAMBOO_VERSION_PATCH {bamboo_patch}
+#define BAMBOO_VERSION_PRERELEASE "{bamboo_prerelease}"
+#define BAMBOO_VERSION_CODENAME "{bamboo_codename}"
+#define BAMBOO_VERSION_STRING "{bamboo_string}"
 """.format(**source[0].read())
         )
 

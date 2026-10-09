@@ -153,7 +153,16 @@ def get_version_info(module_version_string="", silent=False):
         "module_config": str(version.module_config) + module_version_string,
         "website": str(version.website),
         "docs_branch": str(version.docs),
+        # BAMBOO: Bamboo product version, independent from the Godot base version above.
+        "bamboo_major": int(getattr(version, "bamboo_major", 0)),
+        "bamboo_minor": int(getattr(version, "bamboo_minor", 0)),
+        "bamboo_patch": int(getattr(version, "bamboo_patch", 0)),
+        "bamboo_prerelease": str(getattr(version, "bamboo_prerelease", "")),
+        "bamboo_codename": str(getattr(version, "bamboo_codename", "")),
     }
+    version_info["bamboo_string"] = "{bamboo_major}.{bamboo_minor}.{bamboo_patch}".format(**version_info)
+    if version_info["bamboo_prerelease"]:
+        version_info["bamboo_string"] += "-" + version_info["bamboo_prerelease"]
 
     # For dev snapshots (alpha, beta, RC, etc.) we do not commit status change to Git,
     # so this define provides a way to override it without having to modify the source.

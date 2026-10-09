@@ -176,6 +176,14 @@ Dictionary Engine::get_version_info() const {
 	stringver += "-" + String(dict["status"]) + " (" + String(dict["build"]) + ")";
 	dict["string"] = stringver;
 
+	// BAMBOO: Bamboo product version. The keys above keep reporting the Godot base version for compatibility.
+	dict["bamboo_major"] = BAMBOO_VERSION_MAJOR;
+	dict["bamboo_minor"] = BAMBOO_VERSION_MINOR;
+	dict["bamboo_patch"] = BAMBOO_VERSION_PATCH;
+	dict["bamboo_prerelease"] = BAMBOO_VERSION_PRERELEASE;
+	dict["bamboo_codename"] = BAMBOO_VERSION_CODENAME;
+	dict["bamboo_string"] = BAMBOO_VERSION_STRING;
+
 	return dict;
 }
 

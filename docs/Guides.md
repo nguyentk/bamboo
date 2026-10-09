@@ -529,6 +529,9 @@ Checklist trước khi tạo PR:
 | Cảnh báo AccessKit / ANGLE không tìm thấy | Chưa chạy script cài dependency | Chạy `install_accesskit.py` / `install_angle.py`, hoặc bỏ qua (tính năng tự tắt), hoặc `accesskit=no angle=no` |
 | Build hết RAM, bị kill | Quá nhiều job song song / `scu_build` | Giảm luồng: `scons -j4`, hoặc `scu_limit=…` |
 | Linker rất chậm (Linux) | Dùng linker mặc định | `linker=mold` hoặc `linker=lld` |
+| macOS: `Undefined symbols ... ___isPlatformVersionAtLeast` khi link | `clang++` trong `PATH` không phải Apple Clang (vd. clang của llvm-mingw ở `/usr/local/bin`, cài để cross-compile Windows) | Build với Apple Clang đứng trước: `PATH="/usr/bin:$PATH" scons platform=macos ...` |
+| macOS: `You have not agreed to the Xcode license agreements` | Chưa chấp nhận license Xcode | Chạy `sudo xcodebuild -license accept` một lần |
+| macOS: `Godot requires Apple Clang 16 (Xcode 16) or newer` | Đang dùng Command Line Tools cũ | Cài Xcode 16+ và `xcode-select -s /Applications/Xcode.app/Contents/Developer` |
 | Breakpoint không dừng khi bấm Run trong editor | Game chạy trong process con | Debug bằng cấu hình chạy thẳng project hoặc attach vào process con (§6.1) |
 | Không thấy log trên Windows | Bản GUI không có console | Dùng file `.console.exe` |
 | Lỗi đồ họa chỉ xảy ra trên một máy | Driver GPU / API | Chạy với `--gpu-validation --verbose`, thử `--rendering-driver` khác |
