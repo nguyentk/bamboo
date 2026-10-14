@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.12, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+tonemap_mode = 0
+
+[sub_resource type="QuadMesh" id="Quad"]
+size = Vector2(2, 2)
+
+[sub_resource type="StandardMaterial3D" id="Red"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Green"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Blue"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 1, 0.5)
+
+[node name="Root" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+fov = 50.0
+
+[node name="Back" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.3, -1)
+mesh = SubResource("Quad")
+material_override = SubResource("Red")
+
+[node name="Middle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+mesh = SubResource("Quad")
+material_override = SubResource("Green")
+
+[node name="Front" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.3, 1)
+mesh = SubResource("Quad")
+material_override = SubResource("Blue")

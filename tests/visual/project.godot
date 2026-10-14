@@ -1,0 +1,20 @@
+; Bamboo golden-image test project. Scenes are rendered by misc/scripts/capture_golden_images.py.
+
+config_version=5
+
+[application]
+
+config/name="BambooVisualTests"
+
+[display]
+
+window/size/viewport_width=320
+window/size/viewport_height=240
+window/size/resizable=false
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=0
+anti_aliasing/quality/use_taa=false
+anti_aliasing/quality/screen_space_aa=0
+environment/defaults/default_clear_color=Color(0.1, 0.1, 0.12, 1)

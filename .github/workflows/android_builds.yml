@@ -12,6 +12,7 @@ env:
   SCONS_FLAGS: >-
     dev_mode=yes
     module_text_server_fb_enabled=yes
+    engine_update_check=no
 
 jobs:
   build-android:
@@ -35,6 +36,13 @@ jobs:
             target: template_debug
             instrumented_tests: false
             scons-flags: arch=arm32
+
+          # BAMBOO: x86_64 template for Android emulators and ChromeOS devices.
+          - name: Template x86_64 (target=template_debug, arch=x86_64)
+            cache-name: android-template-x86_64
+            target: template_debug
+            instrumented_tests: false
+            scons-flags: arch=x86_64
 
           - name: Template arm64 (target=template_debug, arch=arm64)
             cache-name: android-template-arm64

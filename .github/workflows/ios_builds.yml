@@ -9,6 +9,7 @@ env:
     dev_mode=yes
     module_text_server_fb_enabled=yes
     debug_symbols=no
+    engine_update_check=no
 
 jobs:
   ios-template:
@@ -34,6 +35,14 @@ jobs:
         uses: ./.github/actions/godot-build
         with:
           scons-flags: ${{ env.SCONS_FLAGS }}
+          platform: ios
+          target: template_release
+
+      # BAMBOO: Simulator build (arm64) for testing on Apple Silicon Macs without a device.
+      - name: Compilation (simulator arm64)
+        uses: ./.github/actions/godot-build
+        with:
+          scons-flags: ${{ env.SCONS_FLAGS }} simulator=yes arch=arm64
           platform: ios
           target: template_release
 

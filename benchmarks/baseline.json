@@ -1,0 +1,87 @@
+{
+  "bamboo_version": "0.1.0-alpha.2",
+  "benchmarks": [
+    {
+      "draw_calls": 0.0,
+      "fps_avg": 723.896736130591,
+      "frame_time_ms": 1.3814125,
+      "frame_time_p95_ms": 1.413,
+      "memory_bytes": 104370825,
+      "memory_delta_bytes": 25994972,
+      "name": "bench_2d_sprites",
+      "node_count": 10003.0,
+      "physics_monitor_ms": 0.0,
+      "physics_time_ms": 0.0
+    },
+    {
+      "draw_calls": 0.0,
+      "fps_avg": 13124.077213321,
+      "frame_time_ms": 0.0761958333333331,
+      "frame_time_p95_ms": 0.078,
+      "memory_bytes": 95666429,
+      "memory_delta_bytes": 9631852,
+      "name": "bench_3d_draw_calls",
+      "node_count": 2509.0,
+      "physics_monitor_ms": 0.0,
+      "physics_time_ms": 0.0
+    },
+    {
+      "draw_calls": 0.0,
+      "fps_avg": 60.0563328402041,
+      "frame_time_ms": 16.6510333333333,
+      "frame_time_p95_ms": 16.672,
+      "memory_bytes": 105096177,
+      "memory_delta_bytes": 16992100,
+      "name": "bench_physics_3d_stack",
+      "node_count": 1005.0,
+      "physics_monitor_ms": 0.976850000000004,
+      "physics_time_ms": 0.976850000000004
+    },
+    {
+      "fib_ms": 10.139,
+      "fps_avg": 35.6544371947089,
+      "frame_time_ms": 28.047,
+      "memory_bytes": 102200402,
+      "memory_delta_bytes": 980,
+      "name": "bench_gdscript_cpu",
+      "physics_time_ms": 0.0,
+      "sort_ms": 14.038,
+      "vector_math_ms": 3.875
+    },
+    {
+      "draw_calls": 0.0,
+      "fps_avg": 359281.437125748,
+      "frame_time_ms": 0.00278333333333334,
+      "frame_time_p95_ms": 0.003,
+      "memory_bytes": 102224504,
+      "memory_delta_bytes": 19792,
+      "name": "bench_startup_time",
+      "node_count": 3.0,
+      "physics_monitor_ms": 0.012,
+      "physics_time_ms": 0.0,
+      "startup_ms": 101.0
+    },
+    {
+      "draw_calls": 0.0,
+      "fps_avg": 356083.086053412,
+      "frame_time_ms": 0.00280833333333334,
+      "frame_time_p95_ms": 0.003,
+      "memory_bytes": 146703192,
+      "memory_delta_bytes": 44483640,
+      "name": "bench_memory_footprint",
+      "node_count": 6003.0,
+      "physics_monitor_ms": 0.012,
+      "physics_time_ms": 0.0
+    }
+  ],
+  "build": "bamboo",
+  "cpu": "Apple M4",
+  "godot_version": "4.8.0-dev",
+  "headless": true,
+  "os": "macOS",
+  "physics_engine": "Jolt Physics",
+  "renderer": "forward_plus",
+  "schema_version": 1,
+  "process_wall_ms": 4752.835167,
+  "runs": 3
+}

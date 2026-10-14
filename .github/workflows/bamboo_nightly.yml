@@ -1,0 +1,126 @@
+# BAMBOO: Nightly benchmark + golden-image job (sprint 0.1.0-alpha.2, RT/RND).
+#
+# Benchmarks and golden images depend on the hardware and GPU driver, so each runner keeps its own
+# baseline in the repository:
+#   benchmarks/baselines/<runner>.json      (benchmarks/baseline.json is the developer-machine baseline)
+#   tests/visual/golden/<runner>/           (tests/visual/golden/ is the developer-machine Metal baseline)
+# When a runner has no baseline yet (first run), the job records one, uploads it as an artifact and
+# emits a warning: review it, then commit it to enable regression checks on that runner.
+name: 🌙 Bamboo Nightly
+on:
+  schedule:
+    - cron: "0 19 * * *" # 02:00 Asia/Ho_Chi_Minh
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}|${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  SCONS_FLAGS: >-
+    target=editor
+    engine_update_check=no
+    custom_modules=bamboo_modules
+
+jobs:
+  nightly:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux (llvmpipe / lavapipe)
+            os: ubuntu-24.04
+            runner-id: linux
+            platform: linuxbsd
+            scons-flags: accesskit=no
+            bin: ./bin/bamboo.linuxbsd.editor.x86_64
+            # Software rendering needs a virtual X display.
+            gpu-wrapper: xvfb-run -a -s "-screen 0 1280x720x24"
+
+          - name: macOS (Metal)
+            os: macos-latest
+            runner-id: macos
+            platform: macos
+            scons-flags: vulkan=no arch=arm64
+            bin: ./bin/bamboo.macos.editor.arm64
+            gpu-wrapper: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup dependencies (Linux)
+        if: matrix.platform == 'linuxbsd'
+        run: |
+          sudo apt-get update
+          sudo apt-get install libwayland-bin mesa-vulkan-drivers xvfb
+
+      - name: Restore Godot build cache
+        uses: ./.github/actions/godot-cache-restore
+        with:
+          cache-name: nightly-${{ matrix.runner-id }}
+        continue-on-error: true
+
+      - name: Setup Python and SCons
+        uses: ./.github/actions/godot-deps
+
+      - name: Install Pillow
+        run: python -m pip install Pillow
+
+      - name: Compilation
+        uses: ./.github/actions/godot-build
+        with:
+          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }}
+          platform: ${{ matrix.platform }}
+          target: editor
+
+      - name: Save Godot build cache
+        uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: nightly-${{ matrix.runner-id }}
+        continue-on-error: true
+
+      - name: Benchmarks
+        id: benchmarks
+        shell: bash
+        run: |
+          mkdir -p nightly
+          baseline="benchmarks/baselines/${{ matrix.runner-id }}.json"
+          mkdir -p benchmarks/baselines
+          if [ -f "$baseline" ]; then
+            python misc/scripts/run_benchmarks.py --binary ${{ matrix.bin }} --runs 3 \
+              --baseline "$baseline" --output-json nightly/benchmarks.json
+          else
+            python misc/scripts/run_benchmarks.py --binary ${{ matrix.bin }} --runs 3 \
+              --baseline "$baseline" --output-json nightly/benchmarks.json --update-baseline
+            cp "$baseline" nightly/
+            echo "::warning::No benchmark baseline for runner '${{ matrix.runner-id }}'. Recorded one in the artifact; review and commit it as $baseline."
+          fi
+
+      - name: Golden images
+        id: golden
+        if: success() || steps.benchmarks.conclusion == 'failure'
+        shell: bash
+        run: |
+          golden="tests/visual/golden/${{ matrix.runner-id }}"
+          if ls "$golden"/*.png > /dev/null 2>&1; then
+            ${{ matrix.gpu-wrapper }} python misc/scripts/capture_golden_images.py --binary ${{ matrix.bin }} \
+              --golden-dir "$golden" --output-dir nightly/visual
+          else
+            ${{ matrix.gpu-wrapper }} python misc/scripts/capture_golden_images.py --binary ${{ matrix.bin }} \
+              --golden-dir "$golden" --output-dir nightly/visual --update-golden
+            mkdir -p nightly/golden && cp "$golden"/*.png nightly/golden/
+            echo "::warning::No golden images for runner '${{ matrix.runner-id }}'. Recorded them in the artifact; review and commit them to $golden/."
+          fi
+
+      - name: Upload nightly results
+        if: always()
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: bamboo-nightly-${{ matrix.runner-id }}
+          path: nightly

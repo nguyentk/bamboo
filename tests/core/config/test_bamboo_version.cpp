@@ -88,14 +88,14 @@ TEST_CASE("[BambooVersion] Display strings contain the Bamboo and Godot base ver
 	CHECK(full_name.ends_with(full_build));
 }
 
-TEST_CASE("[BambooVersion] Sprint 0.1.0-alpha.1 values") {
+TEST_CASE("[BambooVersion] Sprint 0.1.0-alpha.2 values") {
 	// Update this test case together with `version.py` when bumping the Bamboo version.
 	CHECK_EQ(BAMBOO_VERSION_MAJOR, 0);
 	CHECK_EQ(BAMBOO_VERSION_MINOR, 1);
 	CHECK_EQ(BAMBOO_VERSION_PATCH, 0);
-	CHECK_EQ(String(BAMBOO_VERSION_PRERELEASE), String("alpha.1"));
+	CHECK_EQ(String(BAMBOO_VERSION_PRERELEASE), String("alpha.2"));
 	CHECK_EQ(String(BAMBOO_VERSION_CODENAME), String("Sprout"));
-	CHECK_EQ(String(BAMBOO_VERSION_STRING), String("0.1.0-alpha.1"));
+	CHECK_EQ(String(BAMBOO_VERSION_STRING), String("0.1.0-alpha.2"));
 	CHECK_EQ(String(GODOT_VERSION_NAME), String("Bamboo Engine"));
 }
 
