@@ -14,5 +14,5 @@ docs = "latest"
 bamboo_major = 0
 bamboo_minor = 1
 bamboo_patch = 0
-bamboo_prerelease = "alpha.3"
+bamboo_prerelease = "beta.1"
 bamboo_codename = "Sprout"

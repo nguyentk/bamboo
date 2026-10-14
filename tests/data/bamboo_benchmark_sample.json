@@ -1,0 +1,10 @@
+{
+  "engine": "bamboo",
+  "engine_version": "0.1.0 (sample)",
+  "device": "Sample device",
+  "scene": "main_level",
+  "frames": 1000,
+  "sample": true,
+  "note": "Synthetic numbers for testing misc/scripts/compare_unity_bamboo_metrics.py. Not a measurement.",
+  "metrics": {"fps_avg": 60.0, "fps_1pct_low": 38.0, "draw_calls": 150, "ram_mb": 400.0, "install_size_mb": 60.0, "cold_startup_ms": 3000.0}
+}

@@ -1,0 +1,16 @@
+; BAMBOO: Automated bug bash project (sprint 0.1.0-beta.1). Run through misc/scripts/run_bug_bash.py.
+
+config_version=5
+
+[application]
+
+config/name="Bamboo Bug Bash"
+config/features=PackedStringArray("4.8")
+
+[application/run]
+
+low_processor_mode_sleep_usec=0
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
