@@ -109,7 +109,11 @@ ext.generateGodotLibraryVersion = { List<String> requiredKeys ->
 
         List<String> lines = versionFile.readLines()
         for (String line in lines) {
-            String[] keyValue = line.split("=")
+            // BAMBOO: version.py contains comments and blank lines (Bamboo product version block); skip them.
+            if (line.trim().isEmpty() || line.trim().startsWith("#") || !line.contains("=")) {
+                continue
+            }
+            String[] keyValue = line.split("=", 2)
             String key = keyValue[0].trim()
             String value = keyValue[1].trim().replaceAll("\"", "")
 

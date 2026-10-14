@@ -14,3 +14,5 @@ issue tracker existed.
 | :--- | :--- | :--- |
 | BAMBOO-REG-1 | A `# BAMBOO:` comment inserted into the `version_info_builder` template produced an invalid preprocessor line in `core/version_generated.gen.h` and broke the iOS simulator build. | `tests/python_build/test_regression_version_header.py`, `tests/regression/test_regression_version_header.cpp` |
 | BAMBOO-REG-2 | A project requesting an unavailable 3D physics engine silently fell back to another engine. | `tests/python_build/test_jolt_physics_integration.py` (`test_unknown_engine_falls_back_with_warning`) |
+| BAMBOO-REG-3 | The Android Gradle build parsed every line of `version.py` as `key = value` and failed on the comments and blank lines of the Bamboo version block (all Android CI jobs). | `tests/python_build/test_regression_ci_build.py` (`TestAndroidVersionParsing`) |
+| BAMBOO-REG-4 | `scu_build=yes` builds only compile the test folders listed in `scu_builders.py`; the new `tests/regression/` folder was referenced by `force_link.gen.h` but not compiled, breaking the link. | `tests/python_build/test_regression_ci_build.py` (`TestScuTestFolders`) |

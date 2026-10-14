@@ -436,6 +436,8 @@ def generate_scu_files(max_includes_per_scu):
             "/scene",
             "/servers",
             "/servers/rendering",
+            # BAMBOO: Bamboo regression tests (tests/regression/test_regression_*.cpp, see tests/regression/README.md).
+            "/regression",
         ],
         ["test_macros", "test_main"],
     )
