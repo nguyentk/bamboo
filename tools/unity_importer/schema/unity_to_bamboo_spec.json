@@ -1,0 +1,142 @@
+{
+  "spec_version": "0.1.0",
+  "target_engine": "Bamboo Engine 0.1.0 (Godot 4.8 base)",
+  "description": "Rules for converting Unity 6 / LTS projects (GameObjects, components, scripts, assets) to Bamboo scenes (.tscn), resources (.tres) and scripts.",
+
+  "transform_conversion": {
+    "source": { "handedness": "left", "up": "+Y", "forward": "+Z", "right": "+X", "unit": "meter" },
+    "target": { "handedness": "right", "up": "+Y", "forward": "-Z", "right": "+X", "unit": "meter" },
+    "method": "mirror_z",
+    "position": { "x": "x", "y": "y", "z": "-z" },
+    "direction": { "x": "x", "y": "y", "z": "-z" },
+    "scale": { "x": "x", "y": "y", "z": "z" },
+    "rotation_quaternion": { "x": "-x", "y": "-y", "z": "z", "w": "w" },
+    "applies_to": ["Transform.m_LocalPosition", "Transform.m_LocalRotation", "Transform.m_LocalScale", "serialized Vector3 directions"],
+    "does_not_apply_to": ["Mesh vertices imported from FBX/glTF (converted by the Bamboo importers)"],
+    "notes": "Mirror across the XY plane, M = diag(1, 1, -1). Quaternion: rotation axis is a pseudovector -> (-x, -y, z), angle unchanged."
+  },
+
+  "node_type_mapping": {
+    "GameObject": { "bamboo": "Node3D", "alternatives": ["Node", "Node2D", "Control"], "notes": "Choose by the components present: 3D -> Node3D, 2D -> Node2D, UI (RectTransform) -> Control." },
+    "Transform": { "bamboo": "Node3D.transform", "notes": "Merged into the node itself." },
+    "RectTransform": { "bamboo": "Control", "notes": "Anchors/pivot -> anchor_* / offset_* / pivot_offset." },
+    "Prefab": { "bamboo": "PackedScene", "file": ".tscn", "notes": "Instanced with PackedScene.instantiate() + add_child()." },
+    "Prefab Variant": { "bamboo": "Inherited PackedScene", "file": ".tscn", "notes": "Scene inheritance from the base .tscn." },
+    "Scene (.unity)": { "bamboo": "PackedScene", "file": ".tscn" },
+    "ScriptableObject": { "bamboo": "Resource", "file": ".tres", "notes": "Custom Resource class with @export properties." }
+  },
+
+  "component_mapping": {
+    "MeshFilter+MeshRenderer": { "bamboo": "MeshInstance3D" },
+    "SkinnedMeshRenderer": { "bamboo": "MeshInstance3D", "requires": ["Skeleton3D"] },
+    "Camera": { "bamboo": "Camera3D" },
+    "Light:Directional": { "bamboo": "DirectionalLight3D", "notes": "Intensity units differ; recalibrate." },
+    "Light:Point": { "bamboo": "OmniLight3D" },
+    "Light:Spot": { "bamboo": "SpotLight3D" },
+    "ReflectionProbe": { "bamboo": "ReflectionProbe" },
+    "Rigidbody": { "bamboo": "RigidBody3D", "physics_engine": "Jolt" },
+    "Rigidbody:isKinematic": { "bamboo": "AnimatableBody3D", "alternatives": ["CharacterBody3D"] },
+    "CharacterController": { "bamboo": "CharacterBody3D", "notes": "Move() -> velocity + move_and_slide()." },
+    "BoxCollider": { "bamboo": "CollisionShape3D", "shape": "BoxShape3D", "notes": "Child of the body node; size = Unity size." },
+    "SphereCollider": { "bamboo": "CollisionShape3D", "shape": "SphereShape3D" },
+    "CapsuleCollider": { "bamboo": "CollisionShape3D", "shape": "CapsuleShape3D", "notes": "Unity height includes the caps, Bamboo height too; check direction axis." },
+    "MeshCollider": { "bamboo": "CollisionShape3D", "shape": "ConcavePolygonShape3D", "alternatives": ["ConvexPolygonShape3D"], "notes": "convex=true -> ConvexPolygonShape3D." },
+    "Collider:isTrigger": { "bamboo": "Area3D", "notes": "OnTriggerEnter -> Area3D.body_entered." },
+    "PhysicMaterial": { "bamboo": "PhysicsMaterial", "notes": "dynamicFriction -> friction, bounciness -> bounce." },
+    "Rigidbody2D": { "bamboo": "RigidBody2D" },
+    "BoxCollider2D": { "bamboo": "CollisionShape2D", "shape": "RectangleShape2D" },
+    "CircleCollider2D": { "bamboo": "CollisionShape2D", "shape": "CircleShape2D" },
+    "PolygonCollider2D": { "bamboo": "CollisionPolygon2D" },
+    "SpriteRenderer": { "bamboo": "Sprite2D" },
+    "Tilemap": { "bamboo": "TileMapLayer" },
+    "Animator": { "bamboo": "AnimationTree", "requires": ["AnimationPlayer"], "notes": "Animator Controller states -> AnimationNodeStateMachine." },
+    "Animation": { "bamboo": "AnimationPlayer" },
+    "AudioSource": { "bamboo": "AudioStreamPlayer3D", "alternatives": ["AudioStreamPlayer"], "notes": "spatialBlend = 0 -> AudioStreamPlayer." },
+    "AudioListener": { "bamboo": "AudioListener3D" },
+    "ParticleSystem": { "bamboo": "GPUParticles3D", "alternatives": ["CPUParticles3D"] },
+    "NavMeshAgent": { "bamboo": "NavigationAgent3D" },
+    "NavMeshSurface": { "bamboo": "NavigationRegion3D" },
+    "Canvas": { "bamboo": "CanvasLayer", "notes": "With a full-rect Control root." },
+    "Image": { "bamboo": "TextureRect", "alternatives": ["NinePatchRect"] },
+    "Text": { "bamboo": "Label" },
+    "TextMeshProUGUI": { "bamboo": "RichTextLabel", "alternatives": ["Label"] },
+    "Button": { "bamboo": "Button" },
+    "Volume": { "bamboo": "WorldEnvironment", "notes": "URP/HDRP post-processing -> Environment resource." },
+    "Terrain": { "bamboo": null, "notes": "No built-in terrain; use a heightmap mesh or a terrain addon." }
+  },
+
+  "lifecycle_methods": {
+    "Awake": { "bamboo": "_init", "notes": "_init runs before the node is in the tree; use _enter_tree if tree access is needed." },
+    "OnEnable": { "bamboo": "_enter_tree", "notes": "Or react to visibility/process_mode changes." },
+    "Start": { "bamboo": "_ready" },
+    "Update": { "bamboo": "_process", "signature": "_process(delta: float)" },
+    "FixedUpdate": { "bamboo": "_physics_process", "signature": "_physics_process(delta: float)" },
+    "LateUpdate": { "bamboo": "_process", "notes": "Use a higher process_priority to run after other nodes." },
+    "OnDisable": { "bamboo": "_exit_tree" },
+    "OnDestroy": { "bamboo": "_notification", "notes": "NOTIFICATION_PREDELETE." },
+    "OnCollisionEnter": { "bamboo": "signal body_entered", "notes": "RigidBody3D with contact_monitor = true and max_contacts_reported > 0." },
+    "OnTriggerEnter": { "bamboo": "signal Area3D.body_entered" },
+    "OnTriggerExit": { "bamboo": "signal Area3D.body_exited" }
+  },
+
+  "api_mapping": {
+    "Instantiate(prefab)": "prefab.instantiate() + add_child()",
+    "Destroy(obj)": "queue_free()",
+    "GetComponent<T>()": "get_node() / $Child / typed child reference",
+    "SendMessage": "call() / propagate_call()",
+    "UnityEvent": "signal + connect()",
+    "StartCoroutine": "await (signals, get_tree().create_timer())",
+    "Invoke(name, t)": "get_tree().create_timer(t).timeout.connect(callable)",
+    "DontDestroyOnLoad": "Autoload (project settings)",
+    "SceneManager.LoadScene": "get_tree().change_scene_to_file()",
+    "PlayerPrefs": "ConfigFile saved under user://",
+    "Time.deltaTime": "delta parameter of _process / _physics_process",
+    "Debug.Log": "print()",
+    "Input.GetAxis": "Input.get_axis()",
+    "Input.GetButtonDown": "Input.is_action_just_pressed()",
+    "Physics.Raycast": "PhysicsDirectSpaceState3D.intersect_ray() / RayCast3D"
+  },
+
+  "type_mapping": {
+    "int": "int",
+    "float": "float",
+    "double": "float",
+    "bool": "bool",
+    "string": "String",
+    "Vector2": "Vector2",
+    "Vector3": "Vector3",
+    "Vector4": "Vector4",
+    "Vector2Int": "Vector2i",
+    "Vector3Int": "Vector3i",
+    "Quaternion": "Quaternion",
+    "Color": "Color",
+    "Color32": "Color",
+    "Rect": "Rect2",
+    "Bounds": "AABB",
+    "Matrix4x4": "Projection",
+    "List<T>": "Array[T]",
+    "T[]": "Array[T]",
+    "Dictionary<K,V>": "Dictionary[K, V]",
+    "GameObject": "Node",
+    "Transform": "Node3D",
+    "Sprite": "Texture2D",
+    "AudioClip": "AudioStream",
+    "AnimationClip": "Animation",
+    "Material": "Material",
+    "Mesh": "Mesh",
+    "LayerMask": "int",
+    "Action": "Callable",
+    "Func<T>": "Callable"
+  },
+
+  "material_mapping": {
+    "URP/Lit": { "bamboo": "StandardMaterial3D", "rules": { "roughness": "1 - smoothness", "metallic": "metallic", "albedo": "base color", "normal": "normal map (convert DirectX-style if needed)" } },
+    "URP/Unlit": { "bamboo": "StandardMaterial3D", "rules": { "shading_mode": "unshaded" } },
+    "ShaderGraph": { "bamboo": "VisualShader", "notes": "Manual port, or rewrite as .gdshader." }
+  },
+
+  "input_mapping": {
+    "Input Manager axes": "InputMap actions (project settings)",
+    "New Input System (.inputactions)": "InputMap actions (project settings)"
+  }
+}

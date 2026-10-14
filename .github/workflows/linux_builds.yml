@@ -13,6 +13,7 @@ env:
   SCONS_FLAGS: >-
     dev_mode=yes
     module_text_server_fb_enabled=yes
+    engine_update_check=no
   GODOT_CPP_BRANCH: 4.5
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -242,6 +243,13 @@ jobs:
           ${{ matrix.bin }} --version
           ${{ matrix.bin }} --help
           ${{ matrix.bin }} --headless --test --force-colors
+
+      - name: Bamboo smoke test
+        # Export templates cannot run a project folder (disable_path_overrides); they are smoke-tested
+        # locally with an editor binary that packs the project (see misc/scripts/smoke_test.py).
+        if: matrix.target == 'editor'
+        run: |
+          python misc/scripts/smoke_test.py --binary ${{ matrix.bin }}
 
       - name: .NET source generators tests
         if: matrix.build-mono

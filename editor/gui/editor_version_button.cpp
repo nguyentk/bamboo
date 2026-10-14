@@ -39,7 +39,9 @@ String _get_version_string(EditorVersionButton::VersionFormat p_format) {
 	String main;
 	switch (p_format) {
 		case EditorVersionButton::FORMAT_BASIC: {
-			return GODOT_VERSION_FULL_CONFIG;
+			// BAMBOO: Short label for the editor status bar, e.g. "v0.1.0-alpha.1 (Sprout)".
+			// The full version (including the Godot base) is copied to the clipboard when pressed.
+			return "v" BAMBOO_VERSION_STRING " (" BAMBOO_VERSION_CODENAME ")";
 		} break;
 		case EditorVersionButton::FORMAT_WITH_BUILD: {
 			main = BAMBOO_VERSION_FULL_BUILD; // BAMBOO: Bamboo version + Godot base version.
@@ -83,6 +85,7 @@ void EditorVersionButton::pressed() {
 	DisplayServer::get_singleton()->clipboard_set(_get_version_string(FORMAT_WITH_BUILD));
 	EditorToaster *toaster = EditorToaster::get_singleton();
 	if (toaster) {
+		// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 		toaster->popup_str(TTR("Copied Bamboo editor version."));
 	}
 }

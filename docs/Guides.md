@@ -19,6 +19,7 @@
 10. [Code style & trước khi commit](#10-code-style--trước-khi-commit)
 11. [Xử lý sự cố thường gặp](#11-xử-lý-sự-cố-thường-gặp)
 12. [Quy ước riêng của Bamboo](#12-quy-ước-riêng-của-bamboo)
+13. [Onboarding checklist, nhánh Git & quy ước commit](#13-onboarding-checklist-nhánh-git--quy-ước-commit)
 
 ---
 
@@ -551,3 +552,83 @@ scons target=editor dev_build=yes custom_modules=../bamboo_modules
 - Mọi chỉnh sửa trực tiếp vào code Godot gốc (`core/`, `servers/`, `scene/`, `drivers/`, `platform/`) đánh dấu bằng comment `// BAMBOO:` và gom vào commit riêng theo tính năng, để dễ rebase khi cập nhật Godot upstream.
 - Class mới đăng ký vào `ClassDB` dùng prefix `Bm` (ví dụ `BmVirtualCamera3D`), không đổi tên class có sẵn của Godot.
 - Cấu hình build dùng chung cho team đặt trong `profiles/*.py` (cần tạo); cấu hình cá nhân để ở `custom.py` (đã có trong `.gitignore`, không commit).
+
+---
+
+## 13. Onboarding checklist, nhánh Git & quy ước commit
+
+### 13.1 Checklist cho kỹ sư mới
+
+1. Clone repo và cài SCons (§2).
+2. Chạy script kiểm tra môi trường — mọi dòng phải là `OK` hoặc `WARN`, không có `FAIL`:
+
+```bash
+python3 misc/scripts/check_dev_env.py
+```
+
+   Script kiểm tra Python ≥ 3.9, SCons ≥ 4.4 (và có trong `PATH`), compiler C++ theo OS (macOS: license Xcode đã chấp nhận, Apple Clang ≥ 16, `clang++` trong `PATH` là Apple Clang), dung lượng trống ≥ 20 GB, package Python tùy chọn (`pytest`, `Pillow`). Dùng `--json` để lấy kết quả cho CI.
+3. Build editor (§3) rồi chạy smoke test:
+
+```bash
+python3 misc/scripts/smoke_test.py --binary bin/bamboo.macos.editor.arm64
+```
+
+4. Chạy toàn bộ test Python của tooling:
+
+```bash
+python3 -m unittest discover -s tests/python_build -p "test_*.py"
+```
+
+5. Build kèm test C++ và chạy test phiên bản Bamboo:
+
+```bash
+scons platform=macos arch=arm64 target=editor tests=yes vulkan=no
+```
+
+```bash
+bin/bamboo.macos.editor.arm64 --test --test-case="*[BambooVersion]*"
+```
+
+6. Cài pre-commit (§10) và đọc các tài liệu kiến trúc trong `docs/`.
+
+### 13.2 Nhánh Git
+
+| Nhánh | Vai trò |
+| :--- | :--- |
+| `bamboo/main` | Nhánh phát triển chính của Bamboo |
+| `upstream/master` | Mirror nguyên bản Godot (`https://github.com/godotengine/godot.git`), chỉ fetch, không commit |
+| `release/0.1` | Nhánh phát hành, tạo ở W8 (feature freeze) |
+| `feature/<area>-<mô-tả>` | Nhánh tính năng, merge vào `bamboo/main` qua PR |
+
+Thiết lập remote upstream (một lần):
+
+```bash
+git remote add upstream https://github.com/godotengine/godot.git
+```
+
+```bash
+git fetch upstream master
+```
+
+### 13.3 Quy ước commit
+
+- Định dạng tiêu đề: `[Bamboo <Area>] <mô tả ngắn>` — ví dụ `[Bamboo Version] Add Sprout 0.1.0 codename`, `[Bamboo CI] Disable Godot update check`.
+- Area gợi ý: `Version`, `Branding`, `CI`, `Build`, `Editor`, `Core`, `Render`, `Physics`, `Platform`, `Docs`, `UnityPort`.
+- Mỗi commit một tính năng; commit chạm vào `core/`, `servers/`, `scene/`, `main/`, `editor/`, `platform/`, `drivers/` phải có comment `// BAMBOO: <lý do>` tại chỗ sửa.
+- Không sửa `thirdparty/`; không đổi header bản quyền gốc.
+
+### 13.4 Nhãn issue (triage)
+
+| Nhãn | Ý nghĩa |
+| :--- | :--- |
+| `P0-Blocker` | Chặn phát hành / crash / mất dữ liệu — xử lý ngay |
+| `P1-High` | Lỗi nghiêm trọng, cần sửa trong sprint |
+| `P2-Normal` | Lỗi/tính năng thông thường |
+| `P3-Low` | Ưu tiên thấp |
+| `area/core`, `area/editor`, `area/render`, `area/platform`, `area/ci`, `area/unity-port` | Phân vùng |
+
+Tạo nhãn trên GitHub bằng script (cần `gh` đã đăng nhập, quyền ghi repo):
+
+```bash
+sh misc/scripts/setup_github_labels.sh
+```

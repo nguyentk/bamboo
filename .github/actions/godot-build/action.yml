@@ -33,9 +33,10 @@ runs:
 
         if [ "${{ github.event.number }}" != "" ]; then
           # Set build identifier with pull request number if available. This is displayed throughout the editor.
-          export BUILD_NAME="gh-${{ github.event.number }}"
+          export BUILD_NAME="bamboo-pr${{ github.event.number }}"
         else
-          export BUILD_NAME="gh"
+          # BAMBOO: Official CI builds are identified as `bamboo` (never `official`, which enables Godot-specific behavior).
+          export BUILD_NAME="bamboo"
         fi
 
         scons platform=${{ inputs.platform }} target=${{ inputs.target }} ${{ inputs.scons-flags }} "cache_path=${{ inputs.scons-cache }}" redirect_build_objects=no
