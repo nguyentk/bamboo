@@ -18,7 +18,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from typing import Callable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Optional, Sequence
 
 MIN_PYTHON = (3, 9)
 MIN_SCONS = (4, 4)
@@ -40,11 +40,11 @@ class CheckResult:
 
 
 # A runner takes a command and returns (exit_code, combined_output).
-Runner = Callable[[Sequence[str]], Tuple[int, str]]
+Runner = Callable[[Sequence[str]], tuple[int, str]]
 Which = Callable[[str], Optional[str]]
 
 
-def default_runner(cmd: Sequence[str]) -> Tuple[int, str]:
+def default_runner(cmd: Sequence[str]) -> tuple[int, str]:
     try:
         proc = subprocess.run(list(cmd), capture_output=True, text=True, timeout=60)
     except (OSError, subprocess.TimeoutExpired) as e:
@@ -52,7 +52,7 @@ def default_runner(cmd: Sequence[str]) -> Tuple[int, str]:
     return proc.returncode, (proc.stdout + proc.stderr).strip()
 
 
-def parse_version(text: str) -> Optional[Tuple[int, ...]]:
+def parse_version(text: str) -> Optional[tuple[int, ...]]:
     match = re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", text)
     if not match:
         return None
@@ -98,7 +98,7 @@ def check_scons(runner: Runner, which: Which) -> CheckResult:
     return CheckResult("scons", OK, f"SCons {version_str}")
 
 
-def _check_compiler_macos(runner: Runner, which: Which) -> List[CheckResult]:
+def _check_compiler_macos(runner: Runner, which: Which) -> list[CheckResult]:
     results = []
     code, out = runner(["xcrun", "--sdk", "macosx", "--show-sdk-path"])
     if code != 0:
@@ -126,9 +126,7 @@ def _check_compiler_macos(runner: Runner, which: Which) -> List[CheckResult]:
     code, out = runner(["xcrun", "clang++", "--version"])
     match = re.search(r"Apple clang version (\d+)", out)
     if code != 0 or not match:
-        results.append(
-            CheckResult("compiler", FAIL, "Apple Clang not found via xcrun", "Install Xcode 16 or newer")
-        )
+        results.append(CheckResult("compiler", FAIL, "Apple Clang not found via xcrun", "Install Xcode 16 or newer"))
         return results
     major = int(match.group(1))
     if major < MIN_APPLE_CLANG:
@@ -162,7 +160,7 @@ def _check_compiler_macos(runner: Runner, which: Which) -> List[CheckResult]:
     return results
 
 
-def check_compiler(system: str, runner: Runner, which: Which) -> List[CheckResult]:
+def check_compiler(system: str, runner: Runner, which: Which) -> list[CheckResult]:
     if system == "Darwin":
         return _check_compiler_macos(runner, which)
     if system == "Windows":
@@ -194,7 +192,7 @@ def check_compiler(system: str, runner: Runner, which: Which) -> List[CheckResul
     ]
 
 
-def check_disk(path: str, min_gb: float, disk_usage: Callable = shutil.disk_usage) -> CheckResult:
+def check_disk(path: str, min_gb: float, disk_usage: Callable[..., Any] = shutil.disk_usage) -> CheckResult:
     free_gb = disk_usage(path).free / (1024**3)
     if free_gb >= min_gb:
         return CheckResult("disk", OK, f"{free_gb:.1f} GB free")
@@ -207,8 +205,8 @@ def check_disk(path: str, min_gb: float, disk_usage: Callable = shutil.disk_usag
 
 
 def check_optional_packages(
-    packages: Sequence[str] = OPTIONAL_PYTHON_PACKAGES, find_spec: Optional[Callable] = None
-) -> List[CheckResult]:
+    packages: Sequence[str] = OPTIONAL_PYTHON_PACKAGES, find_spec: Optional[Callable[..., Any]] = None
+) -> list[CheckResult]:
     if find_spec is None:
         import importlib.util
 
@@ -237,7 +235,7 @@ def run_checks(
     which: Which = shutil.which,
     repo_path: str = ".",
     min_disk_gb: float = DEFAULT_MIN_DISK_GB,
-) -> List[CheckResult]:
+) -> list[CheckResult]:
     system = system or platform.system()
     results = [check_python(), check_scons(runner, which)]
     results += check_compiler(system, runner, which)

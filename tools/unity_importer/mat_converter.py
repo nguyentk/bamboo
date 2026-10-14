@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,7 +37,7 @@ def fmt(value: float) -> str:
     return f"{value:.4f}".rstrip("0").rstrip(".")
 
 
-def _props(entries: Optional[List]) -> Dict:
+def _props(entries: Optional[list[Any]]) -> dict[str, Any]:
     """Flatten Unity's `- _Name: value` lists into a dict."""
     result = {}
     for entry in entries or []:
@@ -46,7 +46,7 @@ def _props(entries: Optional[List]) -> Dict:
     return result
 
 
-def _first(props: Dict, *names):
+def _first(props: dict[str, Any], *names):
     for name in names:
         if name in props and props[name] is not None:
             return props[name]
@@ -63,10 +63,10 @@ def _texture_guid(tex_env) -> Optional[str]:
 
 
 def convert_material(
-    unity_text: str, guid_index: Optional[Dict[str, str]] = None, res_prefix: str = "res://assets"
-) -> Tuple[str, List[str]]:
+    unity_text: str, guid_index: Optional[dict[str, str]] = None, res_prefix: str = "res://assets"
+) -> tuple[str, list[str]]:
     """Return (tres_text, warnings)."""
-    warnings: List[str] = []
+    warnings: list[str] = []
     material = next((o for o in unity_yaml.parse_documents(unity_text) if o.class_id == MATERIAL_CLASS_ID), None)
     if material is None:
         raise ValueError("No Material object found in the .mat file")
@@ -76,8 +76,8 @@ def convert_material(
     floats = _props(saved.get("m_Floats"))
     colors = _props(saved.get("m_Colors"))
 
-    properties: List[str] = []
-    ext_resources: List[str] = []
+    properties: list[str] = []
+    ext_resources: list[str] = []
 
     def texture_resource(prop: str, label: str) -> Optional[str]:
         tex_env = tex_envs.get(prop)

@@ -23,7 +23,7 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence
+from typing import Optional, Sequence
 
 # Upstream Godot commit Bamboo was forked from (used when `upstream/master` is not fetched).
 FORK_BASE = "c24bf5d933"
@@ -43,8 +43,8 @@ class Hunk:
     path: str
     new_start: int
     new_count: int
-    added: List[str] = field(default_factory=list)
-    removed: List[str] = field(default_factory=list)
+    added: list[str] = field(default_factory=list)
+    removed: list[str] = field(default_factory=list)
     tagged: bool = False
 
 
@@ -52,10 +52,10 @@ class Hunk:
 class FileReport:
     path: str
     new_file: bool
-    hunks: List[Hunk] = field(default_factory=list)
+    hunks: list[Hunk] = field(default_factory=list)
 
     @property
-    def untagged(self) -> List[Hunk]:
+    def untagged(self) -> list[Hunk]:
         return [h for h in self.hunks if not h.tagged]
 
 
@@ -83,8 +83,8 @@ def resolve_base(repo: str, base: Optional[str]) -> str:
         return FORK_BASE
 
 
-def parse_diff(diff_text: str) -> Dict[str, List[Hunk]]:
-    hunks: Dict[str, List[Hunk]] = {}
+def parse_diff(diff_text: str) -> dict[str, list[Hunk]]:
+    hunks: dict[str, list[Hunk]] = {}
     path = None
     current: Optional[Hunk] = None
     for line in diff_text.splitlines():
@@ -108,7 +108,7 @@ def parse_diff(diff_text: str) -> Dict[str, List[Hunk]]:
     return hunks
 
 
-def read_lines(repo: str, path: str) -> List[str]:
+def read_lines(repo: str, path: str) -> list[str]:
     try:
         with open(os.path.join(repo, path), encoding="utf-8", errors="replace") as f:
             return f.read().splitlines()
@@ -116,7 +116,7 @@ def read_lines(repo: str, path: str) -> List[str]:
         return []
 
 
-def is_tagged(hunk: Hunk, file_lines: List[str], window: int) -> bool:
+def is_tagged(hunk: Hunk, file_lines: list[str], window: int) -> bool:
     if any(MARKER.search(line) for line in hunk.added):
         return True
     start = max(0, hunk.new_start - 1 - window)
@@ -124,16 +124,14 @@ def is_tagged(hunk: Hunk, file_lines: List[str], window: int) -> bool:
     return any(MARKER.search(line) for line in file_lines[start:end])
 
 
-def audit(repo: str, base: str, committed_only: bool = False, window: int = 15) -> List[FileReport]:
+def audit(repo: str, base: str, committed_only: bool = False, window: int = 15) -> list[FileReport]:
     target = [f"{base}..HEAD"] if committed_only else [base]
     diff = git(repo, "diff", "-U0", "--no-color", "--no-renames", *target, "--")
-    added_files = set(
-        git(repo, "diff", "--name-only", "--diff-filter=A", "--no-renames", *target, "--").split()
-    )
+    added_files = set(git(repo, "diff", "--name-only", "--diff-filter=A", "--no-renames", *target, "--").split())
     if not committed_only:
         added_files |= set(git(repo, "ls-files", "--others", "--exclude-standard").split())
 
-    reports: Dict[str, FileReport] = {}
+    reports: dict[str, FileReport] = {}
     for path, hunks in parse_diff(diff).items():
         if not in_scope(path) or path in added_files:
             continue
@@ -146,7 +144,7 @@ def audit(repo: str, base: str, committed_only: bool = False, window: int = 15) 
         if not in_scope(path):
             continue
         lines = read_lines(repo, path)
-        hunk = Hunk(path, 1, len(lines), added=lines, tagged=any(MARKER.search(l) for l in lines))
+        hunk = Hunk(path, 1, len(lines), added=lines, tagged=any(MARKER.search(line) for line in lines))
         reports[path] = FileReport(path, True, [hunk])
     return [reports[p] for p in sorted(reports)]
 
@@ -173,7 +171,7 @@ def format_report(reports: Sequence[FileReport], base: str) -> str:
     if untagged:
         lines += ["", "## Untagged patches", ""]
         for h in untagged:
-            preview = next((l.strip() for l in h.added if l.strip()), "(removed lines only)")
+            preview = next((line.strip() for line in h.added if line.strip()), "(removed lines only)")
             lines.append(f"- `{h.path}:{h.new_start}` — `{preview[:100]}`")
     else:
         lines += ["", "All patches are tagged."]
@@ -183,7 +181,9 @@ def format_report(reports: Sequence[FileReport], base: str) -> str:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Audit `BAMBOO:` tags on patches to upstream Godot code.")
     parser.add_argument("--repo", default=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    parser.add_argument("--base", help=f"Upstream base ref (default: merge-base with upstream/master, else {FORK_BASE}).")
+    parser.add_argument(
+        "--base", help=f"Upstream base ref (default: merge-base with upstream/master, else {FORK_BASE})."
+    )
     parser.add_argument("--committed-only", action="store_true", help="Ignore uncommitted and untracked changes.")
     parser.add_argument("--window", type=int, default=15)
     parser.add_argument("--output", help="Write the Markdown report to this file.")

@@ -11,7 +11,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import unittest
 from collections import Counter
 
@@ -92,8 +91,10 @@ def placeholder_mismatches(entries):
         if e["obsolete"] or "fuzzy" in e["flags"] or not e["id"]:
             continue
         for translation in e["str"]:
-            if translation and specifiers(e["id"]) != specifiers(translation) and (
-                e["plural"] is None or specifiers(e["plural"]) != specifiers(translation)
+            if (
+                translation
+                and specifiers(e["id"]) != specifiers(translation)
+                and (e["plural"] is None or specifiers(e["plural"]) != specifiers(translation))
             ):
                 result.append((e["id"], translation))
     return result
@@ -126,7 +127,12 @@ class TestPotTemplate(unittest.TestCase):
 
     def test_bamboo_strings_present(self):
         ids = {e["id"] for e in self.entries}
-        for msgid in ("About Bamboo Engine...", "About Bamboo Engine", "Files have been modified outside Bamboo", "%s - Bamboo Engine"):
+        for msgid in (
+            "About Bamboo Engine...",
+            "About Bamboo Engine",
+            "Files have been modified outside Bamboo",
+            "%s - Bamboo Engine",
+        ):
             self.assertIn(msgid, ids)
         self.assertNotIn("About Godot...", ids)
 
@@ -138,14 +144,14 @@ class TestPotTemplate(unittest.TestCase):
 
 class TestExtractor(unittest.TestCase):
     def test_extracts_context_plural_and_concatenation(self):
-        source = '''
+        source = """
             label->set_text(TTR("Hello " "World"));
             x = TTRC("Open", "Menu");
             y = TTRN("%d file", "%d files", count);
             z = RTRN("%d node", "%d nodes", n, "Tree");
             w = TTR(U"Size: %d × %d");
             v = TTR(dynamic_text);  // Not a literal, skipped.
-        '''
+        """
         found = [(msgid, ctx, plural) for _, msgid, ctx, plural in make_pot.extract_from_text(source)]
         self.assertEqual(
             found,
@@ -159,15 +165,13 @@ class TestExtractor(unittest.TestCase):
         )
 
     def test_pot_format_roundtrip(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "src.cpp")
-            entries = make_pot.OrderedDict()
-            entry = make_pot.Entry("A \\\"quoted\\\" %s", "Ctx")
-            entry.locations.append("src.cpp:1")
-            entries[("Ctx", entry.msgid)] = entry
-            parsed = parse_po(make_pot.format_pot(entries))
-            self.assertEqual(parsed[1]["ctx"], "Ctx")
-            self.assertEqual(parsed[1]["id"], 'A \\"quoted\\" %s')
+        entries = make_pot.OrderedDict()
+        entry = make_pot.Entry('A \\"quoted\\" %s', "Ctx")
+        entry.locations.append("src.cpp:1")
+        entries[("Ctx", entry.msgid)] = entry
+        parsed = parse_po(make_pot.format_pot(entries))
+        self.assertEqual(parsed[1]["ctx"], "Ctx")
+        self.assertEqual(parsed[1]["id"], 'A \\"quoted\\" %s')
 
 
 class TestTranslations(unittest.TestCase):

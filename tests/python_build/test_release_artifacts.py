@@ -57,7 +57,10 @@ class TestPackaging(unittest.TestCase):
         self.assertEqual(sorted(produced), sorted(pr.artifact_names("0.1.0").values()))
 
         with zipfile.ZipFile(os.path.join(self.out, "Bamboo_v0.1.0_win64.zip")) as archive:
-            self.assertEqual(sorted(archive.namelist()), ["bamboo.windows.editor.x86_64.console.exe", "bamboo.windows.editor.x86_64.exe"])
+            self.assertEqual(
+                sorted(archive.namelist()),
+                ["bamboo.windows.editor.x86_64.console.exe", "bamboo.windows.editor.x86_64.exe"],
+            )
         with tarfile.open(os.path.join(self.out, "Bamboo_v0.1.0_linux.x86_64.tar.xz")) as archive:
             self.assertEqual(archive.getnames(), ["bamboo.linuxbsd.editor.x86_64"])
 
@@ -87,7 +90,10 @@ class TestPackaging(unittest.TestCase):
         with open(os.path.join(self.out, "Bamboo_v0.1.0_export_templates.tpz"), "ab") as f:
             f.write(b"tampered")
         sums = pr.read_checksums(os.path.join(self.out, "SHA256SUMS.txt"))
-        self.assertNotEqual(sums["Bamboo_v0.1.0_export_templates.tpz"], pr.sha256_file(os.path.join(self.out, "Bamboo_v0.1.0_export_templates.tpz")))
+        self.assertNotEqual(
+            sums["Bamboo_v0.1.0_export_templates.tpz"],
+            pr.sha256_file(os.path.join(self.out, "Bamboo_v0.1.0_export_templates.tpz")),
+        )
 
     def test_cli_without_artifacts_fails(self):
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):

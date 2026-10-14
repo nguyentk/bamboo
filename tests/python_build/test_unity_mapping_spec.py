@@ -37,7 +37,13 @@ class TestSpecSchema(unittest.TestCase):
         self.spec = load_spec()
 
     def test_required_sections(self):
-        for key in ("node_type_mapping", "transform_conversion", "lifecycle_methods", "component_mapping", "type_mapping"):
+        for key in (
+            "node_type_mapping",
+            "transform_conversion",
+            "lifecycle_methods",
+            "component_mapping",
+            "type_mapping",
+        ):
             self.assertIn(key, self.spec)
             self.assertTrue(self.spec[key], key)
 

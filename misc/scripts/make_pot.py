@@ -19,7 +19,7 @@ import os
 import re
 import sys
 from collections import OrderedDict
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Iterable, Optional, Sequence
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SOURCE_DIRS = ["editor", "platform", "modules", "scene", "servers", "main", "core"]
@@ -29,7 +29,7 @@ PLURAL_MACROS = ("TTRN", "RTRN", "ETRN")
 # String literal with an optional encoding prefix (U"...", u8"...", L"...").
 STRING_RE = re.compile(r'(?:u8|[uUL])?"((?:[^"\\\n]|\\.)*)"')
 
-Key = Tuple[str, str]  # (context, msgid)
+Key = tuple[str, str]  # (context, msgid)
 
 
 class Entry:
@@ -37,7 +37,7 @@ class Entry:
         self.msgid = msgid
         self.context = context
         self.plural = plural
-        self.locations: List[str] = []
+        self.locations: list[str] = []
 
 
 def _skip_space(text: str, pos: int) -> int:
@@ -55,7 +55,7 @@ def _skip_space(text: str, pos: int) -> int:
     return pos
 
 
-def _read_literal(text: str, pos: int) -> Tuple[Optional[str], int]:
+def _read_literal(text: str, pos: int) -> tuple[Optional[str], int]:
     """Read one or more adjacent string literals starting at `pos`."""
     parts = []
     pos = _skip_space(text, pos)
@@ -89,7 +89,7 @@ def _skip_argument(text: str, pos: int) -> int:
     return pos
 
 
-def extract_from_text(text: str) -> Iterable[Tuple[int, str, str, str]]:
+def extract_from_text(text: str) -> Iterable[tuple[int, str, str, str]]:
     """Yield (line, msgid, context, plural) for every translatable call in `text`."""
     for match in MACRO_RE.finditer(text):
         # Ignore macro definitions and identifiers such as `MY_TTR(`.
@@ -104,24 +104,24 @@ def extract_from_text(text: str) -> Iterable[Tuple[int, str, str, str]]:
         if macro in PLURAL_MACROS:
             pos = _skip_space(text, pos)
             if pos < len(text) and text[pos] == ",":
-                plural, pos = _read_literal(text, pos + 1)
-                plural = plural or ""
+                literal, pos = _read_literal(text, pos + 1)
+                plural = literal or ""
                 pos = _skip_space(text, pos)
                 if pos < len(text) and text[pos] == ",":
                     pos = _skip_argument(text, pos + 1)  # The count argument.
                     if pos < len(text) and text[pos] == ",":
-                        context, pos = _read_literal(text, pos + 1)
-                        context = context or ""
+                        literal, pos = _read_literal(text, pos + 1)
+                        context = literal or ""
         else:
             pos = _skip_space(text, pos)
             if pos < len(text) and text[pos] == ",":
-                context, pos = _read_literal(text, pos + 1)
-                context = context or ""
+                literal, pos = _read_literal(text, pos + 1)
+                context = literal or ""
         yield line, msgid, context, plural
 
 
-def collect(root: str = REPO_ROOT) -> "OrderedDict[Key, Entry]":
-    entries: "OrderedDict[Key, Entry]" = OrderedDict()
+def collect(root: str = REPO_ROOT) -> OrderedDict[Key, Entry]:
+    entries: OrderedDict[Key, Entry] = OrderedDict()
     for directory in SOURCE_DIRS:
         for dirpath, dirnames, filenames in os.walk(os.path.join(root, directory)):
             dirnames[:] = sorted(d for d in dirnames if d not in ("thirdparty", "tests"))
@@ -140,7 +140,7 @@ def collect(root: str = REPO_ROOT) -> "OrderedDict[Key, Entry]":
     return entries
 
 
-def format_pot(entries: "OrderedDict[Key, Entry]", project: str = "Bamboo Engine editor") -> str:
+def format_pot(entries: OrderedDict[Key, Entry], project: str = "Bamboo Engine editor") -> str:
     lines = [
         f"# {project} translation template.",
         "# Copyright (c) 2026 Bamboo Engine contributors.",

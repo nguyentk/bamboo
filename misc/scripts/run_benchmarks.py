@@ -22,7 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -42,7 +42,7 @@ REQUIRED_SCENARIOS = [
 REQUIRED_FIELDS = ["fps_avg", "frame_time_ms", "physics_time_ms", "memory_bytes"]
 
 # Metric -> True when higher is better.
-TRACKED_METRICS: Dict[str, bool] = {
+TRACKED_METRICS: dict[str, bool] = {
     "fps_avg": True,
     "frame_time_ms": False,
     "frame_time_p95_ms": False,
@@ -66,7 +66,7 @@ DEFAULT_TOLERANCES = {
 }
 
 
-def validate_report(report: dict) -> List[str]:
+def validate_report(report: dict[str, Any]) -> list[str]:
     """Return a list of schema errors (empty when the report is valid)."""
     errors = []
     benchmarks = report.get("benchmarks")
@@ -97,8 +97,8 @@ def relative_change(baseline: float, current: float, higher_is_better: bool) -> 
 
 
 def find_regressions(
-    baseline: dict, current: dict, tolerance: Optional[float] = None
-) -> List[Tuple[str, str, float, float, float]]:
+    baseline: dict[str, Any], current: dict[str, Any], tolerance: Optional[float] = None
+) -> list[tuple[str, str, float, float, float]]:
     """Return (scenario, metric, baseline, current, worse_ratio) for every regression.
 
     `tolerance` overrides the per-metric DEFAULT_TOLERANCES when given.
@@ -122,9 +122,9 @@ def find_regressions(
     return regressions
 
 
-def median_report(reports: Sequence[dict]) -> dict:
+def median_report(reports: Sequence[dict[str, Any]]) -> dict[str, Any]:
     """Merge several runs: numeric fields become the median across runs."""
-    merged = json.loads(json.dumps(reports[0]))
+    merged: dict[str, Any] = json.loads(json.dumps(reports[0]))
     for index, bench in enumerate(merged["benchmarks"]):
         for key, value in bench.items():
             if isinstance(value, (int, float)) and not isinstance(value, bool):
@@ -134,7 +134,7 @@ def median_report(reports: Sequence[dict]) -> dict:
     return merged
 
 
-def run_once(binary: str, timeout: float) -> dict:
+def run_once(binary: str, timeout: float) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="bamboo_bench_") as tmp:
         output = os.path.join(tmp, "results.json")
         cmd = [binary, "--headless", "--path", BENCHMARK_DIR, "--", f"--output={output}"]
@@ -145,12 +145,12 @@ def run_once(binary: str, timeout: float) -> dict:
             tail = "\n".join((proc.stdout + proc.stderr).strip().splitlines()[-15:])
             raise RuntimeError(f"Benchmark run failed (exit {proc.returncode}):\n{tail}")
         with open(output, encoding="utf-8") as f:
-            report = json.load(f)
+            report: dict[str, Any] = json.load(f)
     report["process_wall_ms"] = wall_ms
     return report
 
 
-def format_markdown(report: dict) -> str:
+def format_markdown(report: dict[str, Any]) -> str:
     lines = [
         f"Bamboo {report.get('bamboo_version')} (Godot {report.get('godot_version')}), "
         f"renderer {report.get('renderer')}, headless={report.get('headless')}, {report.get('os')}, {report.get('cpu')}",

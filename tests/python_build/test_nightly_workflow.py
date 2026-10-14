@@ -93,8 +93,18 @@ class TestGoldenDirOption(unittest.TestCase):
             try:
                 golden = os.path.join(tmp, "golden", "linux")
                 output = os.path.join(tmp, "out")
-                args = ["--binary", "x", "--scenes", "test_pbr_materials", "--methods", "forward_plus",
-                        "--golden-dir", golden, "--output-dir", output]
+                args = [
+                    "--binary",
+                    "x",
+                    "--scenes",
+                    "test_pbr_materials",
+                    "--methods",
+                    "forward_plus",
+                    "--golden-dir",
+                    golden,
+                    "--output-dir",
+                    output,
+                ]
                 self.assertEqual(cgi.main(args), 1)
                 self.assertEqual(cgi.main(args + ["--update-golden"]), 0)
                 self.assertTrue(os.path.isfile(os.path.join(golden, "test_pbr_materials_forward_plus.png")))

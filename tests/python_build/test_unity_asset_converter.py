@@ -6,7 +6,6 @@ Run: python3 -m unittest tests/python_build/test_unity_asset_converter.py
 Set BAMBOO_BINARY=bin/bamboo.<platform>.editor.<arch> to also load the generated files in the engine.
 """
 
-import math
 import os
 import re
 import subprocess
@@ -114,7 +113,10 @@ class TestMaterialConverter(unittest.TestCase):
             self.assertLessEqual(len(component.split(".")[-1]) if "." in component else 0, 4)
 
     def test_textures_resolved_with_guid_index(self):
-        index = {"4a7c9e1b2d3f4a5b6c7d8e9f0a1b2c3d": "Textures/enemy.png", "6b1d0f3c2a8e4b7f9c0d1e2f3a4b5c6d": "Textures/enemy_n.png"}
+        index = {
+            "4a7c9e1b2d3f4a5b6c7d8e9f0a1b2c3d": "Textures/enemy.png",
+            "6b1d0f3c2a8e4b7f9c0d1e2f3a4b5c6d": "Textures/enemy_n.png",
+        }
         text, warnings = mat_converter.convert_material(read(SAMPLE_MAT), index)
         self.assertEqual(warnings, [])
         self.assertIn('path="res://assets/Textures/enemy.png" id="1_albedo"', text)
@@ -182,12 +184,20 @@ class TestPrefabConverter(unittest.TestCase):
         self.assertIn('parent="."', shape)
         self.assertEqual(parse_transform(prop(shape, "transform"))[9:], [0.0, 1.0, -0.5])
         self.assertEqual(prop(node_block(self.tscn, "Eye Light"), "visible"), "false")
-        self.assertEqual(prop(node_block(self.tscn, "Body"), "metadata/unity_mesh_guid"), '"9f8e7d6c5b4a39281706f5e4d3c2b1a0"')
+        self.assertEqual(
+            prop(node_block(self.tscn, "Body"), "metadata/unity_mesh_guid"), '"9f8e7d6c5b4a39281706f5e4d3c2b1a0"'
+        )
 
     def test_three_level_nesting_paths(self):
         nested = prefab_to_tscn.convert_prefab(
-            read(SAMPLE_PREFAB).replace("m_Children: []\n  m_Father: {fileID: 201}", "m_Children:\n  - {fileID: 401}\n  m_Father: {fileID: 201}")
-            .replace("  - {fileID: 201}\n  - {fileID: 401}\n  m_Father: {fileID: 0}", "  - {fileID: 201}\n  m_Father: {fileID: 0}")
+            read(SAMPLE_PREFAB)
+            .replace(
+                "m_Children: []\n  m_Father: {fileID: 201}", "m_Children:\n  - {fileID: 401}\n  m_Father: {fileID: 201}"
+            )
+            .replace(
+                "  - {fileID: 201}\n  - {fileID: 401}\n  m_Father: {fileID: 0}",
+                "  - {fileID: 201}\n  m_Father: {fileID: 0}",
+            )
             .replace("m_Father: {fileID: 101}\n--- !u!108", "m_Father: {fileID: 301}\n--- !u!108")
         )
         self.assertIn('[node name="Eye Light" type="OmniLight3D" parent="Body/Weapon"]', nested)
@@ -198,7 +208,9 @@ class TestPrefabConverter(unittest.TestCase):
         self.assertIn('[node name="Body2" type="OmniLight3D" parent="."]', tscn)
 
     def test_variant_without_root_raises(self):
-        variant = "%YAML 1.1\n--- !u!1001 &1\nPrefabInstance:\n  m_SourcePrefab: {fileID: 100100000, guid: abc, type: 3}\n"
+        variant = (
+            "%YAML 1.1\n--- !u!1001 &1\nPrefabInstance:\n  m_SourcePrefab: {fileID: 100100000, guid: abc, type: 3}\n"
+        )
         with self.assertRaises(ValueError):
             prefab_to_tscn.convert_prefab(variant)
 
@@ -233,9 +245,20 @@ class TestLoadInEngine(unittest.TestCase):
             with open(os.path.join(tmp, "material.tres"), "w") as f:
                 f.write(mat_converter.convert_material(read(SAMPLE_MAT).replace("fileID: 2800000", "fileID: 0"))[0])
             proc = subprocess.run(
-                [os.environ["BAMBOO_BINARY"], "--headless", "--path", tmp, "--script", "res://validate.gd", "--",
-                 "res://enemy.tscn", "res://material.tres"],
-                capture_output=True, text=True, timeout=120,
+                [
+                    os.environ["BAMBOO_BINARY"],
+                    "--headless",
+                    "--path",
+                    tmp,
+                    "--script",
+                    "res://validate.gd",
+                    "--",
+                    "res://enemy.tscn",
+                    "res://material.tres",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
             )
             output = proc.stdout + proc.stderr
             self.assertEqual(proc.returncode, 0, output)

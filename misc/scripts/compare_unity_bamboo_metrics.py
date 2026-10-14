@@ -26,10 +26,10 @@ import argparse
 import json
 import os
 import sys
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 # metric -> (label, unit, higher_is_better)
-METRICS: Dict[str, Tuple[str, str, bool]] = {
+METRICS: dict[str, tuple[str, str, bool]] = {
     "fps_avg": ("FPS average", "FPS", True),
     "fps_1pct_low": ("FPS 1% low", "FPS", True),
     "draw_calls": ("Draw calls / frame", "", False),
@@ -39,16 +39,16 @@ METRICS: Dict[str, Tuple[str, str, bool]] = {
 }
 
 
-def load_metrics(path: str, expected_engine: str) -> dict:
+def load_metrics(path: str, expected_engine: str) -> dict[str, Any]:
     with open(path, encoding="utf-8") as f:
-        data = json.load(f)
+        data: dict[str, Any] = json.load(f)
     errors = validate(data, expected_engine)
     if errors:
         raise ValueError(f"{path}: " + "; ".join(errors))
     return data
 
 
-def validate(data: dict, expected_engine: str) -> List[str]:
+def validate(data: dict[str, Any], expected_engine: str) -> list[str]:
     errors = []
     if data.get("engine") != expected_engine:
         errors.append(f"engine must be '{expected_engine}'")
@@ -77,13 +77,21 @@ def improvement(unity: float, bamboo: float, higher_is_better: bool) -> float:
     return change if higher_is_better else -change
 
 
-def compare(unity: dict, bamboo: dict) -> List[dict]:
+def compare(unity: dict[str, Any], bamboo: dict[str, Any]) -> list[dict[str, Any]]:
     rows = []
     for key, (label, unit, higher_is_better) in METRICS.items():
         u, b = float(unity["metrics"][key]), float(bamboo["metrics"][key])
         gain = improvement(u, b, higher_is_better)
         verdict = "Bamboo better" if gain > 0.5 else ("Unity better" if gain < -0.5 else "Parity")
-        rows.append({"metric": key, "label": label, "unit": unit, "unity": u, "bamboo": b, "improvement": gain, "verdict": verdict})
+        rows.append({
+            "metric": key,
+            "label": label,
+            "unit": unit,
+            "unity": u,
+            "bamboo": b,
+            "improvement": gain,
+            "verdict": verdict,
+        })
     return rows
 
 
@@ -92,7 +100,7 @@ def fmt_value(value: float, unit: str) -> str:
     return f"{text} {unit}".strip()
 
 
-def format_report(unity: dict, bamboo: dict, rows: Sequence[dict]) -> str:
+def format_report(unity: dict[str, Any], bamboo: dict[str, Any], rows: Sequence[dict[str, Any]]) -> str:
     sample = unity.get("sample") or bamboo.get("sample")
     lines = ["# Unity vs Bamboo — parity benchmark", ""]
     if sample:

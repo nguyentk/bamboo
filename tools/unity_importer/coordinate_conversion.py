@@ -21,10 +21,10 @@ already converted by Bamboo's importers (ufbx / glTF) and must NOT be converted 
 from __future__ import annotations
 
 import math
-from typing import Sequence, Tuple
+from typing import Sequence
 
-Vec3 = Tuple[float, float, float]
-Quat = Tuple[float, float, float, float]  # (x, y, z, w), same component order as Unity and Bamboo
+Vec3 = tuple[float, float, float]
+Quat = tuple[float, float, float, float]  # (x, y, z, w), same component order as Unity and Bamboo
 
 
 def convert_position(v: Sequence[float]) -> Vec3:

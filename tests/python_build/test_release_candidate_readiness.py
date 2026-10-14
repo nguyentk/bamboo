@@ -38,7 +38,9 @@ class SyntheticRepo(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = self.tmp.name
-        self.write("version.py", 'major = 4\nbamboo_major = 0\nbamboo_minor = 1\nbamboo_patch = 0\nbamboo_prerelease = ""\n')
+        self.write(
+            "version.py", 'major = 4\nbamboo_major = 0\nbamboo_minor = 1\nbamboo_patch = 0\nbamboo_prerelease = ""\n'
+        )
         self.write("benchmarks/baseline.json", json.dumps({"benchmarks": [{"name": f"b{i}"} for i in range(6)]}))
         for method in ("forward_plus", "mobile", "gl_compatibility"):
             self.write(f"tests/visual/golden/scene_{method}.png", "png")
@@ -47,8 +49,13 @@ class SyntheticRepo(unittest.TestCase):
         self.write("bin/Bamboo_v0.1.0_macOS.dmg", "dmg")
         subprocess.run(["git", "init", "-q", self.root], check=True)
         subprocess.run(["git", "-C", self.root, "add", "-A"], check=True)
-        subprocess.run(["git", "-C", self.root, "-c", "user.name=T", "-c", "user.email=t@e", "commit", "-q", "-m", "base"], check=True)
-        self.base = subprocess.run(["git", "-C", self.root, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        subprocess.run(
+            ["git", "-C", self.root, "-c", "user.name=T", "-c", "user.email=t@e", "commit", "-q", "-m", "base"],
+            check=True,
+        )
+        self.base = subprocess.run(
+            ["git", "-C", self.root, "rev-parse", "HEAD"], capture_output=True, text=True
+        ).stdout.strip()
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -75,14 +82,19 @@ class TestCriteria(SyntheticRepo):
         self.assertEqual(len(criteria), 4 + 5 + 2)
 
     def test_prerelease_version_blocks_final_release(self):
-        self.write("version.py", 'major = 4\nbamboo_major = 0\nbamboo_minor = 1\nbamboo_patch = 0\nbamboo_prerelease = "rc.1"\n')
+        self.write(
+            "version.py",
+            'major = 4\nbamboo_major = 0\nbamboo_minor = 1\nbamboo_patch = 0\nbamboo_prerelease = "rc.1"\n',
+        )
         criteria = self.evaluate()
         self.assertFalse(criteria["stable_version"].ok)
         self.assertEqual(criteria["stable_version"].detail, "0.1.0-rc.1")
         self.assertNotIn("stable_version", self.evaluate(final=False))
 
     def test_manual_criteria_need_evidence(self):
-        evidence = dict(FULL_EVIDENCE, ci_green={"ok": True, "evidence": ""}, zero_p0={"ok": False, "evidence": "2 open"})
+        evidence = dict(
+            FULL_EVIDENCE, ci_green={"ok": True, "evidence": ""}, zero_p0={"ok": False, "evidence": "2 open"}
+        )
         criteria = self.evaluate(evidence=evidence)
         self.assertFalse(criteria["ci_green"].ok)
         self.assertFalse(criteria["zero_p0"].ok)

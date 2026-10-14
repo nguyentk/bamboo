@@ -43,7 +43,9 @@ class TestRegressionVersionHeader(unittest.TestCase):
     def generate(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "version_generated.gen.h")
-            core_builders.version_info_builder([_Target(path)], [_Source(methods.get_version_info("", silent=True))], None)
+            core_builders.version_info_builder(
+                [_Target(path)], [_Source(methods.get_version_info("", silent=True))], None
+            )
             with open(path, encoding="utf-8") as f:
                 return f.read()
 

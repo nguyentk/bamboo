@@ -28,7 +28,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import asdict, dataclass
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -93,7 +93,7 @@ def find_editor_binary(template: str) -> Optional[str]:
     return candidates[0] if candidates else None
 
 
-def run(cmd: Sequence[str], timeout: float) -> subprocess.CompletedProcess:
+def run(cmd: Sequence[str], timeout: float) -> subprocess.CompletedProcess[str]:
     return subprocess.run(list(cmd), capture_output=True, text=True, timeout=timeout)
 
 
@@ -111,7 +111,7 @@ def check_header_output(output: str, version: VersionInfo) -> StepResult:
     return StepResult("startup header", False, f"No line starting with '{expected}' in output")
 
 
-def _boot_template(binary: str, editor: str, project_dir: str, timeout: float) -> subprocess.CompletedProcess:
+def _boot_template(binary: str, editor: str, project_dir: str, timeout: float) -> subprocess.CompletedProcess[str]:
     with open(os.path.join(project_dir, "pack.gd"), "w", encoding="utf-8") as f:
         f.write(PACK_SCRIPT)
     game_dir = os.path.join(project_dir, "exported")
@@ -128,8 +128,8 @@ def _boot_template(binary: str, editor: str, project_dir: str, timeout: float) -
 
 def smoke_test(
     binary: str, version: VersionInfo, timeout: float, editor_binary: Optional[str] = None
-) -> List[StepResult]:
-    results: List[StepResult] = []
+) -> list[StepResult]:
+    results: list[StepResult] = []
     if not os.path.isfile(binary):
         return [StepResult("binary", False, f"Binary not found: {binary}")]
 
@@ -155,6 +155,7 @@ def smoke_test(
         create_smoke_project(project_dir)
         try:
             if template:
+                assert editor_binary is not None  # Checked above: templates return early without an editor.
                 proc = _boot_template(binary, editor_binary, project_dir, timeout)
             else:
                 proc = run([binary, "--headless", "--path", project_dir, "--quit"], timeout)

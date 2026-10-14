@@ -23,14 +23,14 @@ import shutil
 import sys
 import tarfile
 import zipfile
-from typing import Dict, List, Optional, Sequence
+from typing import Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bamboo_versioning import REPO_ROOT, load_version  # noqa: E402
 
 
-def artifact_names(version: str) -> Dict[str, str]:
+def artifact_names(version: str) -> dict[str, str]:
     return {
         "macos": f"Bamboo_v{version}_macOS.dmg",
         "windows": f"Bamboo_v{version}_win64.zip",
@@ -55,7 +55,7 @@ def write_checksums(directory: str, names: Sequence[str]) -> str:
     return path
 
 
-def read_checksums(path: str) -> Dict[str, str]:
+def read_checksums(path: str) -> dict[str, str]:
     result = {}
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -73,7 +73,7 @@ def _first(patterns: Sequence[str]) -> Optional[str]:
     return None
 
 
-def collect(bin_dir: str, output_dir: str, version: str) -> (List[str], List[str]):
+def collect(bin_dir: str, output_dir: str, version: str) -> tuple[list[str], list[str]]:
     names = artifact_names(version)
     os.makedirs(output_dir, exist_ok=True)
     produced, missing = [], []
@@ -85,7 +85,9 @@ def collect(bin_dir: str, output_dir: str, version: str) -> (List[str], List[str
     else:
         missing.append(f"{names['macos']} (run misc/scripts/package_macos.sh)")
 
-    windows = [p for p in sorted(glob.glob(os.path.join(bin_dir, "bamboo.windows.editor.x86_64*.exe"))) if ".dev." not in p]
+    windows = [
+        p for p in sorted(glob.glob(os.path.join(bin_dir, "bamboo.windows.editor.x86_64*.exe"))) if ".dev." not in p
+    ]
     if windows:
         with zipfile.ZipFile(os.path.join(output_dir, names["windows"]), "w", zipfile.ZIP_DEFLATED) as archive:
             for path in windows:
@@ -109,7 +111,10 @@ def collect(bin_dir: str, output_dir: str, version: str) -> (List[str], List[str
     else:
         missing.append(f"{names['linux']} (no bamboo.linuxbsd.editor.x86_64 in {bin_dir})")
 
-    tpz = _first([os.path.join(bin_dir, f"Bamboo_v{version}_templates.tpz"), os.path.join(bin_dir, "Bamboo_v*_templates.tpz")])
+    tpz = _first([
+        os.path.join(bin_dir, f"Bamboo_v{version}_templates.tpz"),
+        os.path.join(bin_dir, "Bamboo_v*_templates.tpz"),
+    ])
     if tpz:
         shutil.copyfile(tpz, os.path.join(output_dir, names["templates"]))
         produced.append(names["templates"])

@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 _DOC_HEADER = re.compile(r"^--- !u!(\d+) &(-?\d+)(?: stripped)?\s*$")
 _FLOW_ITEM = re.compile(r"(\w+):\s*([^,}]*)")
@@ -21,7 +21,7 @@ class UnityObject:
     class_id: int
     file_id: int
     type_name: str
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 def parse_scalar(text: str) -> Any:
@@ -47,7 +47,7 @@ def _indent(line: str) -> int:
     return len(line) - len(line.lstrip(" "))
 
 
-def _parse_block(lines: List[str], start: int, indent: int) -> (Any, int):
+def _parse_block(lines: list[str], start: int, indent: int) -> tuple[Any, int]:
     """Parse a block (mapping or sequence) whose lines are indented by `indent`."""
     i = start
     # Skip blank lines.
@@ -56,8 +56,13 @@ def _parse_block(lines: List[str], start: int, indent: int) -> (Any, int):
     if i >= len(lines):
         return None, i
     if lines[i].lstrip(" ").startswith("- "):
-        result_list: List[Any] = []
-        while i < len(lines) and lines[i].strip() and _indent(lines[i]) == indent and lines[i].lstrip(" ").startswith("- "):
+        result_list: list[Any] = []
+        while (
+            i < len(lines)
+            and lines[i].strip()
+            and _indent(lines[i]) == indent
+            and lines[i].lstrip(" ").startswith("- ")
+        ):
             item_text = lines[i].lstrip(" ")[2:]
             item_indent = indent + 2
             # Treat "- key: value" as a mapping whose first line is the item line.
@@ -75,7 +80,7 @@ def _parse_block(lines: List[str], start: int, indent: int) -> (Any, int):
                 i += 1
         return result_list, i
 
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     while i < len(lines):
         line = lines[i]
         if not line.strip():
@@ -97,7 +102,9 @@ def _parse_block(lines: List[str], start: int, indent: int) -> (Any, int):
             j = i + 1
             while j < len(lines) and not lines[j].strip():
                 j += 1
-            if j < len(lines) and (_indent(lines[j]) > indent or (_indent(lines[j]) == indent and lines[j].lstrip(" ").startswith("- "))):
+            if j < len(lines) and (
+                _indent(lines[j]) > indent or (_indent(lines[j]) == indent and lines[j].lstrip(" ").startswith("- "))
+            ):
                 value, i = _parse_block(lines, j, _indent(lines[j]))
                 result[key] = value
             else:
@@ -106,20 +113,18 @@ def _parse_block(lines: List[str], start: int, indent: int) -> (Any, int):
     return result, i
 
 
-def parse_documents(text: str) -> List[UnityObject]:
-    objects: List[UnityObject] = []
-    current_header: Optional[re.Match] = None
-    body: List[str] = []
+def parse_documents(text: str) -> list[UnityObject]:
+    objects: list[UnityObject] = []
+    current_header: Optional[re.Match[str]] = None
+    body: list[str] = []
 
     def flush() -> None:
         if current_header is None or not body:
             return
-        type_line = next((l for l in body if l.strip()), "")
+        type_line = next((line for line in body if line.strip()), "")
         type_name = type_line.strip().rstrip(":")
         data, _ = _parse_block(body[1:], 0, 2)
-        objects.append(
-            UnityObject(int(current_header.group(1)), int(current_header.group(2)), type_name, data or {})
-        )
+        objects.append(UnityObject(int(current_header.group(1)), int(current_header.group(2)), type_name, data or {}))
 
     for line in text.splitlines():
         if line.startswith("%"):
@@ -134,14 +139,14 @@ def parse_documents(text: str) -> List[UnityObject]:
     return objects
 
 
-def load(path: str) -> List[UnityObject]:
+def load(path: str) -> list[UnityObject]:
     with open(path, "r", encoding="utf-8") as f:
         return parse_documents(f.read())
 
 
-def build_guid_index(unity_project: str) -> Dict[str, str]:
+def build_guid_index(unity_project: str) -> dict[str, str]:
     """Map asset GUID -> path relative to the Unity `Assets/` folder (read from `.meta` files)."""
-    index: Dict[str, str] = {}
+    index: dict[str, str] = {}
     assets = os.path.join(unity_project, "Assets")
     guid_re = re.compile(r"^guid:\s*([0-9a-fA-F]+)", re.M)
     for root, _, names in os.walk(assets):

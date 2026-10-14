@@ -298,3 +298,11 @@
 *.py                                          @godotengine/buildsystem
 SConstruct                                    @godotengine/buildsystem
 SCsub                                         @godotengine/buildsystem
+
+# BAMBOO: Bamboo-specific directories (not part of upstream Godot).
+/bamboo_modules/                              @nguyentk
+/benchmarks/                                  @nguyentk
+/docs/                                        @nguyentk
+/game_dogfood/                                @nguyentk
+/profiles/                                    @nguyentk
+/tools/unity_importer/                        @nguyentk

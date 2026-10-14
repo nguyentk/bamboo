@@ -121,7 +121,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         status = "PASS" if result.passed else "FAIL"
         detail = "size mismatch" if result.size_mismatch else f"{result.diff_percent:.3f}% pixels differ"
-        print(f"[{status}] {detail} (threshold {args.threshold * 100:.2f}%), MAE {result.mae:.2f}, RMSE {result.rmse:.2f}")
+        print(
+            f"[{status}] {detail} (threshold {args.threshold * 100:.2f}%), MAE {result.mae:.2f}, RMSE {result.rmse:.2f}"
+        )
         if result.diff_image:
             print(f"Diff image: {result.diff_image}")
     return 0 if result.passed else 1

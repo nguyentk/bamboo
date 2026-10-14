@@ -35,8 +35,9 @@
 
 TEST_FORCE_LINK(test_jolt_physics_default)
 
-#include "modules/modules_enabled.gen.h" // For jolt_physics, godot_physics_3d.
 #include "servers/physics_3d/physics_server_3d_manager.h"
+
+#include "modules/modules_enabled.gen.h" // For jolt_physics, godot_physics_3d.
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_node.h"

@@ -37,7 +37,10 @@ class TestParsing(unittest.TestCase):
         errors = cmp.validate({"engine": "bamboo", "metrics": {"fps_avg": 60}}, "unity")
         self.assertIn("engine must be 'unity'", errors)
         self.assertIn("metrics.draw_calls must be a number", errors)
-        self.assertIn("metrics.fps_avg must not be negative", cmp.validate({"engine": "unity", "metrics": {**{k: 1 for k in cmp.METRICS}, "fps_avg": -1}}, "unity"))
+        self.assertIn(
+            "metrics.fps_avg must not be negative",
+            cmp.validate({"engine": "unity", "metrics": {**{k: 1 for k in cmp.METRICS}, "fps_avg": -1}}, "unity"),
+        )
 
 
 class TestFormulas(unittest.TestCase):
@@ -53,7 +56,10 @@ class TestFormulas(unittest.TestCase):
         self.assertAlmostEqual(cmp.improvement(500.0, 400.0, higher_is_better=False), 20.0)
 
     def test_verdicts(self):
-        rows = {r["metric"]: r for r in cmp.compare(cmp.load_metrics(UNITY_SAMPLE, "unity"), cmp.load_metrics(BAMBOO_SAMPLE, "bamboo"))}
+        rows = {
+            r["metric"]: r
+            for r in cmp.compare(cmp.load_metrics(UNITY_SAMPLE, "unity"), cmp.load_metrics(BAMBOO_SAMPLE, "bamboo"))
+        }
         self.assertEqual(rows["fps_avg"]["verdict"], "Bamboo better")
         self.assertEqual(rows["fps_1pct_low"]["verdict"], "Unity better")
         self.assertEqual(rows["cold_startup_ms"]["verdict"], "Parity")
@@ -68,7 +74,9 @@ class TestReport(unittest.TestCase):
         self.assertIn("| FPS average | 50.0 FPS | 60.0 FPS | +20.0% | Bamboo better |", report)
         self.assertIn("| Install size | 100 MB | 60.0 MB | +40.0% | Bamboo better |", report)
         self.assertIn("SAMPLE DATA", report)
-        self.assertEqual(len([l for l in report.splitlines() if l.startswith("| ") and "---" not in l]), 1 + len(cmp.METRICS))
+        self.assertEqual(
+            len([row for row in report.splitlines() if row.startswith("| ") and "---" not in row]), 1 + len(cmp.METRICS)
+        )
 
     def test_refuses_to_publish_sample_data(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -77,7 +85,9 @@ class TestReport(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertIn("sample data", err)
             self.assertFalse(os.path.exists(output))
-            code, _, _ = quiet(cmp.main, ["--unity", UNITY_SAMPLE, "--bamboo", BAMBOO_SAMPLE, "--output", output, "--allow-sample"])
+            code, _, _ = quiet(
+                cmp.main, ["--unity", UNITY_SAMPLE, "--bamboo", BAMBOO_SAMPLE, "--output", output, "--allow-sample"]
+            )
             self.assertEqual(code, 0)
             self.assertTrue(os.path.exists(output))
 

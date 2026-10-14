@@ -21,7 +21,12 @@ sys.path.insert(0, os.path.join(REPO_ROOT, "misc", "scripts"))
 import check_open_issues as coi  # noqa: E402
 
 FIXTURE = [
-    {"number": 1, "title": "Crash on export", "state": "open", "labels": [{"name": "P0-Blocker"}, {"name": "area/platform"}]},
+    {
+        "number": 1,
+        "title": "Crash on export",
+        "state": "open",
+        "labels": [{"name": "P0-Blocker"}, {"name": "area/platform"}],
+    },
     {"number": 2, "title": "Wrong tooltip", "state": "open", "labels": [{"name": "P2-Normal"}]},
     {"number": 3, "title": "Fixed crash", "state": "closed", "labels": [{"name": "P0-Blocker"}]},
     {"number": 4, "title": "PR fixing #1", "state": "open", "labels": [{"name": "P0-Blocker"}], "pull_request": {}},
@@ -71,7 +76,9 @@ class TestTicketReferences(unittest.TestCase):
             "fix: typo",
             "[Bamboo Release] Bump version to 0.1.0-rc.1",
         ]
-        self.assertEqual(coi.commits_without_ticket(subjects), ["fix: typo", "[Bamboo Release] Bump version to 0.1.0-rc.1"])
+        self.assertEqual(
+            coi.commits_without_ticket(subjects), ["fix: typo", "[Bamboo Release] Bump version to 0.1.0-rc.1"]
+        )
 
 
 @unittest.skipUnless(os.environ.get("BAMBOO_CHECK_GITHUB"), "Set BAMBOO_CHECK_GITHUB=1 to query GitHub")

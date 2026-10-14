@@ -30,7 +30,7 @@
 
 #include "register_types.h"
 
-#include "bamboo_core.h"
+#include "bamboo_modules/bamboo_core/bamboo_core.h"
 
 #include "core/config/engine.h"
 #include "core/object/class_db.h"

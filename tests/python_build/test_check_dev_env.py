@@ -86,9 +86,12 @@ class TestCompilerCheck(unittest.TestCase):
         self.assertTrue(all(r.status == env.OK for r in results), results)
 
     def test_xcode_license_not_accepted(self):
-        runner = make_runner(
-            {"xcrun --sdk": (69, "You have not agreed to the Xcode license agreements. Please run 'sudo xcodebuild -license'")}
-        )
+        runner = make_runner({
+            "xcrun --sdk": (
+                69,
+                "You have not agreed to the Xcode license agreements. Please run 'sudo xcodebuild -license'",
+            )
+        })
         results = env.check_compiler("Darwin", runner, make_which(HEALTHY_MAC_WHICH))
         self.assertEqual(results[0].status, env.FAIL)
         self.assertIn("xcodebuild -license accept", results[0].hint)

@@ -17,7 +17,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "misc", "
 
 import audit_bamboo_patches as audit  # noqa: E402
 
-UPSTREAM_CPP = "\n".join(["#include <cstdio>", "", "int main() {", "\treturn 0;", "}", ""] + [f"// line {i}" for i in range(40)]) + "\n"
+UPSTREAM_CPP = (
+    "\n".join(["#include <cstdio>", "", "int main() {", "\treturn 0;", "}", ""] + [f"// line {i}" for i in range(40)])
+    + "\n"
+)
 
 
 def git(repo, *args):
@@ -59,7 +62,9 @@ class AuditRepo(unittest.TestCase):
 
 class TestDetection(AuditRepo):
     def test_tagged_change_passes(self):
-        self.write("core/main.cpp", UPSTREAM_CPP.replace("\treturn 0;", "\t// BAMBOO: Return a Bamboo exit code.\n\treturn 1;"))
+        self.write(
+            "core/main.cpp", UPSTREAM_CPP.replace("\treturn 0;", "\t// BAMBOO: Return a Bamboo exit code.\n\treturn 1;")
+        )
         reports = self.run_audit()
         self.assertEqual(len(reports), 1)
         self.assertEqual(reports[0].untagged, [])
@@ -70,7 +75,12 @@ class TestDetection(AuditRepo):
 
     def test_marker_within_window_covers_hunk(self):
         # A function-level marker a few lines above the change counts.
-        self.write("core/main.cpp", UPSTREAM_CPP.replace("int main() {", "// BAMBOO: Patched main.\nint main() {").replace("\treturn 0;", "\treturn 3;"))
+        self.write(
+            "core/main.cpp",
+            UPSTREAM_CPP.replace("int main() {", "// BAMBOO: Patched main.\nint main() {").replace(
+                "\treturn 0;", "\treturn 3;"
+            ),
+        )
         self.assertEqual(self.untagged_paths(), [])
 
     def test_marker_outside_window_does_not_cover_hunk(self):

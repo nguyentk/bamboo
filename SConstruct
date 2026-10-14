@@ -58,6 +58,7 @@ import gles3_builders
 import glsl_builders
 import methods
 import scu_builders
+
 # BAMBOO: Output binary prefix / VS solution name come from version.py (env.binary_prefix).
 import version
 from misc.utility.color import is_stderr_color, print_error, print_info, print_warning

@@ -20,25 +20,27 @@ import re
 import runpy
 import subprocess
 import sys
-from typing import List, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence
 
 BRANCH_RE = re.compile(r"^release/(\d+)\.(\d+)$")
 PRERELEASE_RE = re.compile(r"^(?:(beta|rc)\.(\d+))?$")
 FEATURE_COMMIT_RE = re.compile(r"^(feat(\(.+\))?!?:|feature:|\[Bamboo Feature\])", re.IGNORECASE)
 
 
-def check_branch_name(branch: str) -> Tuple[Optional[Tuple[int, int]], List[str]]:
+def check_branch_name(branch: str) -> tuple[Optional[tuple[int, int]], list[str]]:
     match = BRANCH_RE.match(branch)
     if not match:
         return None, [f"branch '{branch}' does not follow the 'release/<major>.<minor>' convention"]
     return (int(match.group(1)), int(match.group(2))), []
 
 
-def check_version(version: dict, line: Optional[Tuple[int, int]]) -> List[str]:
+def check_version(version: dict[str, Any], line: Optional[tuple[int, int]]) -> list[str]:
     errors = []
     prerelease = str(version.get("bamboo_prerelease", ""))
     if not PRERELEASE_RE.match(prerelease):
-        errors.append(f"bamboo_prerelease '{prerelease}' is not allowed after the feature freeze (use beta.N, rc.N or '')")
+        errors.append(
+            f"bamboo_prerelease '{prerelease}' is not allowed after the feature freeze (use beta.N, rc.N or '')"
+        )
     if line is not None:
         current = (int(version.get("bamboo_major", -1)), int(version.get("bamboo_minor", -1)))
         if current != line:
@@ -49,7 +51,7 @@ def check_version(version: dict, line: Optional[Tuple[int, int]]) -> List[str]:
     return errors
 
 
-def find_feature_commits(subjects: Sequence[str]) -> List[str]:
+def find_feature_commits(subjects: Sequence[str]) -> list[str]:
     return [s for s in subjects if FEATURE_COMMIT_RE.match(s.strip())]
 
 
@@ -57,7 +59,7 @@ def git(repo: str, *args: str) -> str:
     return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, check=True).stdout
 
 
-def commit_subjects(repo: str, base: str, branch: str) -> List[str]:
+def commit_subjects(repo: str, base: str, branch: str) -> list[str]:
     try:
         merge_base = git(repo, "merge-base", base, branch).strip()
     except subprocess.CalledProcessError:

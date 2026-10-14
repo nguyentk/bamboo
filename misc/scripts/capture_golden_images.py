@@ -26,7 +26,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -39,8 +39,10 @@ METHODS = ["forward_plus", "mobile", "gl_compatibility"]
 SCENE_METHODS = {"test_canvas_item_2d": ["forward_plus", "gl_compatibility"]}
 
 
-def list_scenes() -> List[str]:
-    return sorted(os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(VISUAL_DIR, "scenes", "*.tscn")))
+def list_scenes() -> list[str]:
+    return sorted(
+        os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(VISUAL_DIR, "scenes", "*.tscn"))
+    )
 
 
 def frame_path(movie_base: str, frame: int) -> str:

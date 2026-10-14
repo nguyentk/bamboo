@@ -19,13 +19,13 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
-from typing import Dict, List, Optional, Sequence
+from typing import Any, Optional, Sequence
 
-PRIORITY_LABELS: Dict[str, str] = {"P0": "P0-Blocker", "P1": "P1-High", "P2": "P2-Normal", "P3": "P3-Low"}
+PRIORITY_LABELS: dict[str, str] = {"P0": "P0-Blocker", "P1": "P1-High", "P2": "P2-Normal", "P3": "P3-Low"}
 TICKET_RE = re.compile(r"(#\d+|\bBAMBOO-\d+\b)")
 
 
-def parse_priorities(value: str) -> List[str]:
+def parse_priorities(value: str) -> list[str]:
     priorities = [p.strip().upper() for p in value.split(",") if p.strip()]
     unknown = [p for p in priorities if p not in PRIORITY_LABELS]
     if unknown:
@@ -33,13 +33,13 @@ def parse_priorities(value: str) -> List[str]:
     return priorities
 
 
-def label_names(issue: dict) -> List[str]:
-    return [l["name"] if isinstance(l, dict) else str(l) for l in issue.get("labels", [])]
+def label_names(issue: dict[str, Any]) -> list[str]:
+    return [label["name"] if isinstance(label, dict) else str(label) for label in issue.get("labels", [])]
 
 
-def filter_issues(issues: Sequence[dict], priorities: Sequence[str]) -> Dict[str, List[dict]]:
+def filter_issues(issues: Sequence[dict[str, Any]], priorities: Sequence[str]) -> dict[str, list[dict[str, Any]]]:
     """Group open issues (pull requests excluded) by requested priority."""
-    result: Dict[str, List[dict]] = {p: [] for p in priorities}
+    result: dict[str, list[dict[str, Any]]] = {p: [] for p in priorities}
     for issue in issues:
         if "pull_request" in issue or str(issue.get("state", "open")).lower() != "open":
             continue
@@ -50,7 +50,7 @@ def filter_issues(issues: Sequence[dict], priorities: Sequence[str]) -> Dict[str
     return result
 
 
-def commits_without_ticket(subjects: Sequence[str]) -> List[str]:
+def commits_without_ticket(subjects: Sequence[str]) -> list[str]:
     """Commit subjects that do not reference an issue (`#123` or `BAMBOO-123`)."""
     return [s for s in subjects if not TICKET_RE.search(s)]
 
@@ -64,9 +64,9 @@ def repo_from_git_remote() -> Optional[str]:
     return match.group(1) if match else None
 
 
-def fetch_issues(repo: str, labels: Sequence[str]) -> List[dict]:
+def fetch_issues(repo: str, labels: Sequence[str]) -> list[dict[str, Any]]:
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    issues: List[dict] = []
+    issues: list[dict[str, Any]] = []
     for label in labels:
         query = urllib.parse.urlencode({"state": "open", "labels": label, "per_page": 100})
         request = urllib.request.Request(f"https://api.github.com/repos/{repo}/issues?{query}")
@@ -103,7 +103,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         try:
             issues = fetch_issues(repo, [PRIORITY_LABELS[p] for p in priorities])
         except OSError as e:
-            print(f"ERROR: cannot read issues from GitHub ({e}); set GITHUB_TOKEN for private repositories.", file=sys.stderr)
+            print(
+                f"ERROR: cannot read issues from GitHub ({e}); set GITHUB_TOKEN for private repositories.",
+                file=sys.stderr,
+            )
             return 2
 
     grouped = filter_issues(issues, priorities)

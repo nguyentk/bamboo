@@ -45,12 +45,19 @@ class TestClassification(unittest.TestCase):
 
     def test_bugbash_lines_are_parsed(self):
         out = 'noise\nBUGBASH {"area": "physics", "check": "x", "passed": true, "details": {"a": 1}}\nmore\n'
-        self.assertEqual(bb.bugbash_entries(out), [{"area": "physics", "check": "x", "passed": True, "details": {"a": 1}}])
+        self.assertEqual(
+            bb.bugbash_entries(out), [{"area": "physics", "check": "x", "passed": True, "details": {"a": 1}}]
+        )
 
 
 class TestRenderingRules(unittest.TestCase):
     def probe(self, **details):
-        line = "BUGBASH " + bb.json.dumps({"area": "rendering", "check": "render_probe", "passed": True, "details": details})
+        line = "BUGBASH " + bb.json.dumps({
+            "area": "rendering",
+            "check": "render_probe",
+            "passed": True,
+            "details": details,
+        })
         original = bb.run
         bb.run = lambda cmd, timeout, cwd=bb.REPO_ROOT: result(0, line + "\n")
         try:

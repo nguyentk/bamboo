@@ -21,7 +21,7 @@ import shutil
 import sys
 import zipfile
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Sequence
+from typing import Optional, Sequence
 
 # bamboo.macos.template_release.arm64[.2d]   (Windows: ... .exe, optional .llvm / .console)
 BINARY_RE = re.compile(
@@ -43,7 +43,7 @@ class BinaryInfo:
     gzip_size: int
 
 
-def compressed_sizes(path: str) -> (int, int):
+def compressed_sizes(path: str) -> tuple[int, int]:
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         archive.write(path, os.path.basename(path))
@@ -53,7 +53,7 @@ def compressed_sizes(path: str) -> (int, int):
     return zip_buffer.tell(), gz_buffer.tell()
 
 
-def find_binaries(bin_dir: str, compress: bool = True) -> List[BinaryInfo]:
+def find_binaries(bin_dir: str, compress: bool = True) -> list[BinaryInfo]:
     if not os.path.isdir(bin_dir):
         raise FileNotFoundError(f"Binary directory not found: {bin_dir}")
     found = []
@@ -63,8 +63,15 @@ def find_binaries(bin_dir: str, compress: bool = True) -> List[BinaryInfo]:
         if not match or not os.path.isfile(path) or match.group("suffix") == "console":
             continue
         key = ".".join(
-            p for p in (match.group("platform"), match.group("target"), match.group("dev") and "dev",
-                        match.group("double") and "double", match.group("arch")) if p
+            p
+            for p in (
+                match.group("platform"),
+                match.group("target"),
+                match.group("dev") and "dev",
+                match.group("double") and "double",
+                match.group("arch"),
+            )
+            if p
         )
         size = os.path.getsize(path)
         zip_size, gzip_size = compressed_sizes(path) if compress else (0, 0)
@@ -77,7 +84,7 @@ def reduction(reference: int, value: int) -> float:
 
 
 def build_table(binaries: Sequence[BinaryInfo]) -> str:
-    groups: Dict[str, List[BinaryInfo]] = {}
+    groups: dict[str, list[BinaryInfo]] = {}
     for b in binaries:
         groups.setdefault(b.key, []).append(b)
 

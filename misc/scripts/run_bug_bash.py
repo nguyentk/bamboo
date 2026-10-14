@@ -33,7 +33,7 @@ import sys
 import tempfile
 import time
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List, Optional, Sequence
+from typing import Any, Optional, Sequence
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -70,7 +70,7 @@ class Finding:
     check: str
     status: str  # pass | P0 | P1 | P2 | P3 | blocked
     summary: str
-    details: Dict = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -92,7 +92,7 @@ def run(cmd: Sequence[str], timeout: float, cwd: str = REPO_ROOT) -> RunResult:
         return RunResult(None, text, True, time.time() - start)
 
 
-def engine_errors(output: str) -> List[str]:
+def engine_errors(output: str) -> list[str]:
     errors = []
     for message in _ERROR_RE.findall(output):
         if not any(p.search(message) for p in BENIGN_ERRORS):
@@ -100,16 +100,21 @@ def engine_errors(output: str) -> List[str]:
     return errors
 
 
-def bugbash_entries(output: str) -> List[Dict]:
+def bugbash_entries(output: str) -> list[dict[str, Any]]:
     return [json.loads(m) for m in _BUGBASH_RE.findall(output)]
 
 
 def crashed(result: RunResult) -> bool:
     # Negative return codes are signals (SIGSEGV, SIGABRT...) on POSIX.
-    return result.timed_out or (result.returncode is not None and result.returncode < 0) or "CrashHandlerException" in result.output or "Program crashed with signal" in result.output
+    return (
+        result.timed_out
+        or (result.returncode is not None and result.returncode < 0)
+        or "CrashHandlerException" in result.output
+        or "Program crashed with signal" in result.output
+    )
 
 
-def classify_run(area: str, check: str, result: RunResult, ok_summary: str, details: Dict) -> Finding:
+def classify_run(area: str, check: str, result: RunResult, ok_summary: str, details: dict[str, Any]) -> Finding:
     errors = engine_errors(result.output)
     details = dict(details, seconds=round(result.seconds, 1))
     if errors:
@@ -129,12 +134,20 @@ def classify_run(area: str, check: str, result: RunResult, ok_summary: str, deta
 # --- Areas -------------------------------------------------------------------------------------
 
 
-def area_editor(binary: str, expected_version: str) -> List[Finding]:
+def area_editor(binary: str, expected_version: str) -> list[Finding]:
     findings = []
     result = run([binary, "--headless", "--quit"], 120)
     header = next((line for line in result.output.splitlines() if line.startswith("Bamboo Engine v")), "")
     ok = f"v{expected_version} " in header
-    findings.append(Finding("editor", "version_header", "pass" if ok else "P1", header or "no startup header", {"expected": expected_version}))
+    findings.append(
+        Finding(
+            "editor",
+            "version_header",
+            "pass" if ok else "P1",
+            header or "no startup header",
+            {"expected": expected_version},
+        )
+    )
 
     for project in PROJECTS:
         result = run([binary, "--headless", "--editor", "--path", project, "--quit"], 300)
@@ -161,7 +174,7 @@ def _templates_dir(godot_full_config: str) -> str:
     return os.path.join(base, "export_templates", godot_full_config)
 
 
-def area_export(binary: str, godot_full_config: str) -> List[Finding]:
+def area_export(binary: str, godot_full_config: str) -> list[Finding]:
     findings = []
     templates = _templates_dir(godot_full_config)
     required = {
@@ -175,21 +188,31 @@ def area_export(binary: str, godot_full_config: str) -> List[Finding]:
         for preset in EXPORT_PRESETS:
             missing = [t for t in required[preset] if not os.path.isfile(os.path.join(templates, t))]
             if missing:
-                findings.append(Finding("export", f"export:{preset}", "blocked", f"templates not installed: {', '.join(missing)}", {"templates_dir": templates}))
+                findings.append(
+                    Finding(
+                        "export",
+                        f"export:{preset}",
+                        "blocked",
+                        f"templates not installed: {', '.join(missing)}",
+                        {"templates_dir": templates},
+                    )
+                )
                 continue
             ext = {"macOS": ".zip", "Windows Desktop": ".exe", "Linux": ".x86_64", "Android": ".apk"}[preset]
             target = os.path.join(out_dir, "dogfood" + ext)
             result = run([binary, "--headless", "--path", "game_dogfood", "--export-release", preset, target], 600)
             finding = classify_run("export", f"export:{preset}", result, "exported", {})
             if finding.status == "pass" and not os.path.isfile(target):
-                finding = Finding("export", f"export:{preset}", "P1", "export reported success but produced no file", finding.details)
+                finding = Finding(
+                    "export", f"export:{preset}", "P1", "export reported success but produced no file", finding.details
+                )
             elif finding.status == "pass":
                 finding.details["size_mib"] = round(os.path.getsize(target) / 1048576, 1)
             findings.append(finding)
     return findings
 
 
-def area_rendering(binary: str, window: bool) -> List[Finding]:
+def area_rendering(binary: str, window: bool) -> list[Finding]:
     if not window:
         return [Finding("rendering", "renderer_matrix", "blocked", "needs a window/GPU (--no-window given)")]
     probe = os.path.join(REPO_ROOT, "tests", "bug_bash", "scripts", "render_probe.gd")
@@ -197,8 +220,19 @@ def area_rendering(binary: str, window: bool) -> List[Finding]:
     for project, scene in RENDER_SCENES:
         for method in RENDERERS:
             check = f"{os.path.basename(scene)}:{method}"
-            cmd = [binary, "--path", project, "--rendering-method", method, "--resolution", "1280x720",
-                   "-s", probe, "--", f"--scene={scene}"]
+            cmd = [
+                binary,
+                "--path",
+                project,
+                "--rendering-method",
+                method,
+                "--resolution",
+                "1280x720",
+                "-s",
+                probe,
+                "--",
+                f"--scene={scene}",
+            ]
             result = run(cmd, 180)
             entries = bugbash_entries(result.output)
             details = entries[0]["details"] if entries else {}
@@ -213,12 +247,14 @@ def area_rendering(binary: str, window: bool) -> List[Finding]:
                     finding.status = "P3"
                     finding.summary = f"VSync on but {details['steady_fps']} FPS on a {refresh:g} Hz display"
                 else:
-                    finding.summary = f"{details.get('steady_fps')} FPS, warm-up worst {details.get('worst_warmup_ms')} ms"
+                    finding.summary = (
+                        f"{details.get('steady_fps')} FPS, warm-up worst {details.get('worst_warmup_ms')} ms"
+                    )
             findings.append(finding)
     return findings
 
 
-def area_physics(binary: str) -> List[Finding]:
+def area_physics(binary: str) -> list[Finding]:
     run([binary, "--headless", "--path", "tests/bug_bash", "--import"], 300)
     result = run([binary, "--headless", "--path", "tests/bug_bash", "-s", "res://scripts/physics_stress.gd"], 600)
     entries = bugbash_entries(result.output)
@@ -227,24 +263,39 @@ def area_physics(binary: str) -> List[Finding]:
     findings = []
     for entry in entries:
         status = "pass" if entry["passed"] else ("P2" if entry["check"] == "stack_physics_time" else "P1")
-        findings.append(Finding("physics", entry["check"], status, "ok" if entry["passed"] else "check failed", entry["details"]))
+        findings.append(
+            Finding("physics", entry["check"], status, "ok" if entry["passed"] else "check failed", entry["details"])
+        )
     return findings
 
 
-def area_game(binary: str, window: bool, soak_seconds: float) -> List[Finding]:
+def area_game(binary: str, window: bool, soak_seconds: float) -> list[Finding]:
     findings = []
     run([binary, "--headless", "--path", "game_dogfood", "--import"], 300)
-    runs = [("dogfood_fps_windowed", [], 60.0)] if window else []
+    runs: list[tuple[str, list[str], float]] = [("dogfood_fps_windowed", [], 60.0)] if window else []
     runs.append(("dogfood_soak_headless", ["--headless"], soak_seconds))
     for check, extra, seconds in runs:
-        cmd = [binary, *extra, "--path", "game_dogfood", "-s", "res://tests/soak_test.gd", "--", f"--seconds={seconds:g}"]
+        cmd = [
+            binary,
+            *extra,
+            "--path",
+            "game_dogfood",
+            "-s",
+            "res://tests/soak_test.gd",
+            "--",
+            f"--seconds={seconds:g}",
+        ]
         result = run(cmd, seconds + 300)
         entries = bugbash_entries(result.output)
         details = entries[0]["details"] if entries else {}
         finding = classify_run("game", check, result, "ok", details)
         if entries and not entries[0]["passed"] and finding.status in ("pass", "P3"):
             finding.status = "P1" if details.get("player_min_y", 0) <= -10 else "P2"
-            finding.summary = "player left the level" if finding.status == "P1" else f"memory growth {details.get('static_mib_per_min')} MiB/min"
+            finding.summary = (
+                "player left the level"
+                if finding.status == "P1"
+                else f"memory growth {details.get('static_mib_per_min')} MiB/min"
+            )
         elif finding.status == "pass" and not extra:
             fps = float(details.get("fps_median", 0))
             finding.summary = f"median {fps:.0f} FPS, min {details.get('fps_min')} FPS"
@@ -261,7 +312,7 @@ def area_game(binary: str, window: bool, soak_seconds: float) -> List[Finding]:
 SEVERITY_ORDER = ["P0", "P1", "P2", "P3", "blocked", "pass"]
 
 
-def triage_counts(findings: Sequence[Finding]) -> Dict[str, int]:
+def triage_counts(findings: Sequence[Finding]) -> dict[str, int]:
     return {s: sum(1 for f in findings if f.status == s) for s in SEVERITY_ORDER}
 
 
@@ -310,7 +361,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     version = load_version()
     areas = [a for a in args.areas.split(",") if a]
     window = not args.no_window
-    findings: List[Finding] = []
+    findings: list[Finding] = []
     for area in areas:
         print(f"== {area}", flush=True)
         if area == "editor":
@@ -330,20 +381,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         findings += new
 
     if args.merge_json:
-        with open(args.merge_json, encoding="utf-8") as f:
-            previous = [Finding(**x) for x in json.load(f)["findings"]]
+        with open(args.merge_json, encoding="utf-8") as fh:
+            previous = [Finding(**x) for x in json.load(fh)["findings"]]
         findings = [f for f in previous if f.area not in areas] + findings
         findings.sort(key=lambda f: AREAS.index(f.area) if f.area in AREAS else len(AREAS))
 
     counts = triage_counts(findings)
     print("Triage: " + ", ".join(f"{k}={v}" for k, v in counts.items()))
     if args.output_json:
-        with open(args.output_json, "w", encoding="utf-8") as f:
-            json.dump({"bamboo_version": version.bamboo_string, "findings": [asdict(x) for x in findings]}, f, indent=2)
+        with open(args.output_json, "w", encoding="utf-8") as fh:
+            json.dump(
+                {"bamboo_version": version.bamboo_string, "findings": [asdict(x) for x in findings]}, fh, indent=2
+            )
     if args.report:
         env = f"{sys.platform}, {os.uname().machine}" if hasattr(os, "uname") else sys.platform
-        with open(args.report, "w", encoding="utf-8") as f:
-            f.write(render_report(findings, version.bamboo_string, binary, env))
+        with open(args.report, "w", encoding="utf-8") as fh:
+            fh.write(render_report(findings, version.bamboo_string, binary, env))
     return 1 if counts["P0"] or counts["P1"] else 0
 
 

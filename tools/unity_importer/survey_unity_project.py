@@ -17,11 +17,11 @@ import os
 import re
 import sys
 from collections import Counter
-from typing import Dict, Optional, Sequence
+from typing import Any, Optional, Sequence
 
 # Unity built-in class IDs (YAML header `--- !u!<class_id> &<file_id>`).
 # Reference: https://docs.unity3d.com/Manual/ClassIDReference.html
-UNITY_CLASS_IDS: Dict[int, str] = {
+UNITY_CLASS_IDS: dict[int, str] = {
     1: "GameObject",
     4: "Transform",
     20: "Camera",
@@ -68,7 +68,16 @@ CATEGORIES = {
         "CircleCollider2D",
         "PolygonCollider2D",
     },
-    "rendering": {"MeshRenderer", "MeshFilter", "SkinnedMeshRenderer", "SpriteRenderer", "Light", "Camera", "ReflectionProbe", "Terrain"},
+    "rendering": {
+        "MeshRenderer",
+        "MeshFilter",
+        "SkinnedMeshRenderer",
+        "SpriteRenderer",
+        "Light",
+        "Camera",
+        "ReflectionProbe",
+        "Terrain",
+    },
     "animation": {"Animator", "Animation"},
     "audio": {"AudioSource", "AudioListener"},
     "vfx": {"ParticleSystem"},
@@ -111,14 +120,14 @@ def is_prefab_variant(text: str) -> bool:
     return 1001 in class_ids and "m_SourcePrefab" in text and 1 not in class_ids
 
 
-def survey(project_path: str) -> dict:
+def survey(project_path: str) -> dict[str, Any]:
     assets = os.path.join(project_path, "Assets")
     if not os.path.isdir(assets):
         raise FileNotFoundError(f"No Assets/ folder found in {project_path}")
 
-    files = Counter()
-    components = Counter()
-    script_features = Counter()
+    files: Counter[str] = Counter()
+    components: Counter[str] = Counter()
+    script_features: Counter[str] = Counter()
     binary_yaml = []
     prefabs = variants = 0
 
@@ -211,7 +220,7 @@ def survey(project_path: str) -> dict:
     }
 
 
-def format_report(report: dict) -> str:
+def format_report(report: dict[str, Any]) -> str:
     lines = [
         f"Unity project: {report['project']}",
         f"Render pipeline: {report['render_pipeline']}",

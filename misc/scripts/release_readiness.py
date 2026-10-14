@@ -31,7 +31,7 @@ import runpy
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
-from typing import Callable, Dict, List, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(REPO_ROOT, "misc", "scripts"))
@@ -64,9 +64,13 @@ def check_benchmark_baseline(root: str) -> Criterion:
 
 def check_golden_images(root: str) -> Criterion:
     golden = os.path.join(root, "tests", "visual", "golden")
-    found = {m: len(glob.glob(os.path.join(golden, f"*_{m}.png"))) for m in ("forward_plus", "mobile", "gl_compatibility")}
+    found = {
+        m: len(glob.glob(os.path.join(golden, f"*_{m}.png"))) for m in ("forward_plus", "mobile", "gl_compatibility")
+    }
     ok = all(count > 0 for count in found.values())
-    return Criterion("golden_images", "Golden images for the 3 renderers", ok, ", ".join(f"{k}: {v}" for k, v in found.items()))
+    return Criterion(
+        "golden_images", "Golden images for the 3 renderers", ok, ", ".join(f"{k}: {v}" for k, v in found.items())
+    )
 
 
 def check_patch_tags(root: str) -> Criterion:
@@ -83,10 +87,15 @@ def check_patch_tags(root: str) -> Criterion:
 
 def check_rebase_rehearsal(root: str) -> Criterion:
     reports = glob.glob(os.path.join(root, "docs", "rebase_reports", "rebase_rehearsal_*.md"))
-    return Criterion("rebase_rehearsal", "Upstream rebase rehearsal report", bool(reports), ", ".join(os.path.basename(r) for r in reports) or "none")
+    return Criterion(
+        "rebase_rehearsal",
+        "Upstream rebase rehearsal report",
+        bool(reports),
+        ", ".join(os.path.basename(r) for r in reports) or "none",
+    )
 
 
-def check_notarized_dmg(root: str, runner: Callable = subprocess.run) -> Criterion:
+def check_notarized_dmg(root: str, runner: Callable[..., Any] = subprocess.run) -> Criterion:
     title = "Notarized macOS .dmg"
     dmgs = sorted(glob.glob(os.path.join(root, "bin", "Bamboo_v*_macOS.dmg")))
     if not dmgs:
@@ -97,21 +106,28 @@ def check_notarized_dmg(root: str, runner: Callable = subprocess.run) -> Criteri
     return Criterion("notarized_dmg", title, ok, f"{os.path.basename(dmgs[-1])}: {output[:120]}")
 
 
-def check_stable_version(version: Dict) -> Criterion:
+def check_stable_version(version: dict[str, Any]) -> Criterion:
     prerelease = str(version.get("bamboo_prerelease", ""))
     label = f"{version.get('bamboo_major')}.{version.get('bamboo_minor')}.{version.get('bamboo_patch')}"
     ok = prerelease == ""
-    return Criterion("stable_version", "version.py marks a stable release", ok, label + (f"-{prerelease}" if prerelease else ""))
+    return Criterion(
+        "stable_version", "version.py marks a stable release", ok, label + (f"-{prerelease}" if prerelease else "")
+    )
 
 
-def check_release_notes(root: str, version: Dict) -> Criterion:
-    pattern = os.path.join(root, "docs", "release_notes", f"Release_Notes_{version.get('bamboo_major')}.{version.get('bamboo_minor')}.{version.get('bamboo_patch')}_*.md")
+def check_release_notes(root: str, version: dict[str, Any]) -> Criterion:
+    pattern = os.path.join(
+        root,
+        "docs",
+        "release_notes",
+        f"Release_Notes_{version.get('bamboo_major')}.{version.get('bamboo_minor')}.{version.get('bamboo_patch')}_*.md",
+    )
     notes = sorted(glob.glob(pattern))
     ok = bool(notes) and os.path.getsize(notes[0]) > 0
     return Criterion("release_notes", "Release notes", ok, os.path.basename(notes[0]) if notes else "missing")
 
 
-def check_manual(evidence: Dict) -> List[Criterion]:
+def check_manual(evidence: dict[str, Any]) -> list[Criterion]:
     result = []
     for key, title in MANUAL_CRITERIA.items():
         item = evidence.get(key) or {}
@@ -121,7 +137,9 @@ def check_manual(evidence: Dict) -> List[Criterion]:
     return result
 
 
-def evaluate(root: str, evidence: Dict, final: bool, runner: Callable = subprocess.run) -> List[Criterion]:
+def evaluate(
+    root: str, evidence: dict[str, Any], final: bool, runner: Callable[..., Any] = subprocess.run
+) -> list[Criterion]:
     version = runpy.run_path(os.path.join(root, "version.py"))
     criteria = check_manual(evidence) + [
         check_benchmark_baseline(root),

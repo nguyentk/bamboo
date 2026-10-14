@@ -31,7 +31,13 @@ bamboo_codename = "Sprout"
 
 
 def version(prerelease="beta.1", minor=1, major=4):
-    return {"major": major, "bamboo_major": 0, "bamboo_minor": minor, "bamboo_patch": 0, "bamboo_prerelease": prerelease}
+    return {
+        "major": major,
+        "bamboo_major": 0,
+        "bamboo_minor": minor,
+        "bamboo_patch": 0,
+        "bamboo_prerelease": prerelease,
+    }
 
 
 class TestRules(unittest.TestCase):

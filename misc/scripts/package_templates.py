@@ -21,7 +21,7 @@ import os
 import re
 import sys
 import zipfile
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -60,9 +60,9 @@ def template_name_for(filename: str) -> Optional[str]:
     return None
 
 
-def discover_templates(bin_dir: str) -> Dict[str, str]:
+def discover_templates(bin_dir: str) -> dict[str, str]:
     """Return {template_name: source_path} for the templates found in `bin_dir`."""
-    found: Dict[str, str] = {}
+    found: dict[str, str] = {}
     if not os.path.isdir(bin_dir):
         return found
     for filename in sorted(os.listdir(bin_dir)):
@@ -72,7 +72,7 @@ def discover_templates(bin_dir: str) -> Dict[str, str]:
     return found
 
 
-def parse_inputs(values: Sequence[str]) -> Dict[str, str]:
+def parse_inputs(values: Sequence[str]) -> dict[str, str]:
     inputs = {}
     for value in values:
         if "=" not in value:
@@ -83,10 +83,10 @@ def parse_inputs(values: Sequence[str]) -> Dict[str, str]:
 
 
 def plan_package(
-    version: VersionInfo, templates: Dict[str, str]
-) -> Tuple[List[Tuple[str, Optional[str], Optional[bytes]]], List[str]]:
+    version: VersionInfo, templates: dict[str, str]
+) -> tuple[list[tuple[str, Optional[str], Optional[bytes]]], list[str]]:
     """Return (entries, missing). Each entry is (archive_path, source_path, inline_data)."""
-    entries: List[Tuple[str, Optional[str], Optional[bytes]]] = [
+    entries: list[tuple[str, Optional[str], Optional[bytes]]] = [
         ("templates/version.txt", None, (version.godot_full_config + "\n").encode("utf-8")),
         ("templates/bamboo_version.txt", None, (version.bamboo_string + "\n").encode("utf-8")),
     ]
@@ -96,12 +96,12 @@ def plan_package(
     return entries, missing
 
 
-def write_package(output: str, entries: Sequence[Tuple[str, Optional[str], Optional[bytes]]]) -> None:
+def write_package(output: str, entries: Sequence[tuple[str, Optional[str], Optional[bytes]]]) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(output)), exist_ok=True)
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for archive_path, source, data in entries:
-            if data is not None:
-                archive.writestr(archive_path, data)
+            if data is not None or source is None:
+                archive.writestr(archive_path, data or b"")
             else:
                 archive.write(source, archive_path)
 

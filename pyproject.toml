@@ -75,6 +75,8 @@ skip = [
 	"editor/project_converter_3_to_4.cpp",
 	"platform/android/java/lib/src/main/java/com/*",
 	"platform/web/package-lock.json",
+	# BAMBOO: Bamboo documentation in docs/ is written in Vietnamese (Godot's English docs live in doc/).
+	"docs/*",
 ]
 ignore-words-list = [
 	"breaked",
@@ -100,6 +102,7 @@ ignore-words-list = [
 	"parm",
 	"pEvent",
 	"requestor",
+	"sectionin", # BAMBOO: NSIS `SectionIn` keyword (misc/dist/windows/bamboo_installer.nsi).
 	"streamin",
 	"te",
 	"textin",

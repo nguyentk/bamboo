@@ -18,7 +18,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Optional, Sequence
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,7 +44,7 @@ COLLIDERS = {CLASS_BOX_COLLIDER, CLASS_SPHERE_COLLIDER, CLASS_CAPSULE_COLLIDER}
 LIGHT_TYPES = {0: "SpotLight3D", 1: "DirectionalLight3D", 2: "OmniLight3D"}
 
 
-def quat_to_basis(q: Sequence[float]) -> List[List[float]]:
+def quat_to_basis(q: Sequence[float]) -> list[list[float]]:
     """Rotation matrix (rows) from a unit quaternion (x, y, z, w)."""
     x, y, z, w = q
     return [
@@ -64,7 +64,7 @@ def transform3d(position: Sequence[float], rotation: Sequence[float], scale: Seq
     return "Transform3D(" + ", ".join(fmt(v) for v in values) + ")"
 
 
-def _vec(data, keys="xyz", default=0.0) -> Tuple[float, ...]:
+def _vec(data, keys="xyz", default=0.0) -> tuple[float, ...]:
     data = data or {}
     return tuple(float(data.get(k, default)) for k in keys)
 
@@ -74,12 +74,12 @@ def _file_id(ref) -> int:
 
 
 class PrefabConverter:
-    def __init__(self, objects: List[unity_yaml.UnityObject]):
-        self.by_id: Dict[int, unity_yaml.UnityObject] = {o.file_id: o for o in objects}
-        self.sub_resources: List[str] = []
-        self.nodes: List[str] = []
+    def __init__(self, objects: list[unity_yaml.UnityObject]):
+        self.by_id: dict[int, unity_yaml.UnityObject] = {o.file_id: o for o in objects}
+        self.sub_resources: list[str] = []
+        self.nodes: list[str] = []
 
-    def components_of(self, game_object: unity_yaml.UnityObject) -> List[unity_yaml.UnityObject]:
+    def components_of(self, game_object: unity_yaml.UnityObject) -> list[unity_yaml.UnityObject]:
         result = []
         for entry in game_object.data.get("m_Component") or []:
             component = self.by_id.get(_file_id((entry or {}).get("component")))
@@ -87,7 +87,7 @@ class PrefabConverter:
                 result.append(component)
         return result
 
-    def node_type(self, components: List[unity_yaml.UnityObject]) -> str:
+    def node_type(self, components: list[unity_yaml.UnityObject]) -> str:
         ids = {c.class_id for c in components}
         if CLASS_RIGIDBODY in ids:
             rigidbody = next(c for c in components if c.class_id == CLASS_RIGIDBODY)
@@ -111,7 +111,7 @@ class PrefabConverter:
             return "AudioStreamPlayer3D"
         return "Node3D"
 
-    def add_shape(self, collider: unity_yaml.UnityObject) -> Optional[Tuple[str, str]]:
+    def add_shape(self, collider: unity_yaml.UnityObject) -> Optional[tuple[str, str]]:
         """Create the shape sub-resource; return (sub_resource_id, local Transform3D)."""
         res_id = f"Shape_{len(self.sub_resources) + 1}"
         center = _vec(collider.data.get("m_Center"))
@@ -124,7 +124,9 @@ class PrefabConverter:
             body = f"radius = {fmt(collider.data.get('m_Radius', 0.5))}"
             shape = "SphereShape3D"
         elif collider.class_id == CLASS_CAPSULE_COLLIDER:
-            body = f"radius = {fmt(collider.data.get('m_Radius', 0.5))}\nheight = {fmt(collider.data.get('m_Height', 2))}"
+            body = (
+                f"radius = {fmt(collider.data.get('m_Radius', 0.5))}\nheight = {fmt(collider.data.get('m_Height', 2))}"
+            )
             shape = "CapsuleShape3D"
             # Unity m_Direction: 0 = X, 1 = Y (Bamboo capsules are Y-aligned), 2 = Z.
             direction = int(collider.data.get("m_Direction", 1))
@@ -135,7 +137,7 @@ class PrefabConverter:
         self.sub_resources.append(f'[sub_resource type="{shape}" id="{res_id}"]\n{body}')
         return res_id, transform3d(center, rotation, (1.0, 1.0, 1.0))
 
-    def emit(self, transform: unity_yaml.UnityObject, parent_path: Optional[str], used_names: Dict[str, int]) -> None:
+    def emit(self, transform: unity_yaml.UnityObject, parent_path: Optional[str], used_names: dict[str, int]) -> None:
         game_object = self.by_id.get(_file_id(transform.data.get("m_GameObject")))
         if game_object is None:
             return
@@ -169,16 +171,18 @@ class PrefabConverter:
             if mesh.get("guid"):
                 lines.append(f'metadata/unity_mesh_guid = "{mesh["guid"]}"')
             if mesh.get("fileID"):
-                lines.append(f'metadata/unity_mesh_file_id = {mesh["fileID"]}')
+                lines.append(f"metadata/unity_mesh_file_id = {mesh['fileID']}")
         self.nodes.append("\n".join(lines))
 
         my_path = "." if parent_path is None else (name if parent_path == "." else f"{parent_path}/{name}")
-        child_names: Dict[str, int] = {}
+        child_names: dict[str, int] = {}
         for index, collider in enumerate(c for c in components if c.class_id in COLLIDERS):
             shape = self.add_shape(collider)
             if shape:
                 res_id, shape_transform = shape
-                shape_lines = [f'[node name="CollisionShape3D{index + 1 if index else ""}" type="CollisionShape3D" parent="{my_path}"]']
+                shape_lines = [
+                    f'[node name="CollisionShape3D{index + 1 if index else ""}" type="CollisionShape3D" parent="{my_path}"]'
+                ]
                 if shape_transform != "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)":
                     shape_lines.append(f"transform = {shape_transform}")
                 shape_lines.append(f'shape = SubResource("{res_id}")')
