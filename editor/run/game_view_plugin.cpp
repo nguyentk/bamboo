@@ -1804,6 +1804,7 @@ void GameViewPluginBase::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 #ifndef ANDROID_ENABLED
+			// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 			window_wrapper->set_window_title(vformat(TTR("%s - Bamboo Engine"), TTR("Game Workspace")));
 #endif
 		} break;

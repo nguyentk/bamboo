@@ -710,10 +710,12 @@ void ProjectManager::_open_selected_projects_check_warnings() {
 			const String &feature = unsupported_features[i];
 			if (feature == "Double Precision") {
 				ask_update_backup->show();
+				// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 				warning_message += TTR("Warning: This project uses double precision floats, but this version of\nBamboo uses single precision floats. Opening this project may cause data loss.\n\n");
 				unsupported_features.remove_at(i);
 				i--;
 			} else if (feature == "C#") {
+				// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 				warning_message += TTR("Warning: This project uses C#, but this build of Bamboo does not have\nthe Mono module. If you proceed you will not be able to use any C# scripts.\n\n");
 				unsupported_features.remove_at(i);
 				i--;
@@ -724,6 +726,7 @@ void ProjectManager::_open_selected_projects_check_warnings() {
 					migration_guide_button->show();
 				}
 				version_convert_feature = feature;
+				// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 				warning_message += vformat(TTR("Warning: This project was last edited in Bamboo %s. Opening will change it to Bamboo %s.\n\n"), Variant(feature), Variant(GODOT_VERSION_BRANCH));
 				unsupported_features.remove_at(i);
 				i--;
@@ -731,6 +734,7 @@ void ProjectManager::_open_selected_projects_check_warnings() {
 		}
 		if (!unsupported_features.is_empty()) {
 			String unsupported_features_str = String(", ").join(unsupported_features);
+			// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 			warning_message += vformat(TTR("Warning: This project uses the following features not supported by this build of Bamboo:\n\n%s\n\n"), unsupported_features_str);
 		}
 		warning_message += TTR("Open anyway? Project will be modified.");
@@ -924,6 +928,7 @@ void ProjectManager::_open_recovery_mode_ask(bool manual) {
 	// Only show the initial crash preamble if this popup wasn't manually triggered.
 	if (!manual) {
 		recovery_mode_details +=
+				// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 				TTR("It looks like Bamboo crashed when opening this project the last time. If you're having problems editing this project, you can try to open it in Recovery Mode.") +
 				String::utf8("\n\n");
 	}
@@ -1487,6 +1492,7 @@ ProjectManager::ProjectManager() {
 
 		title_bar_logo = memnew(Button);
 		title_bar_logo->set_flat(true);
+		// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 		title_bar_logo->set_tooltip_text(TTR("About Bamboo Engine"));
 		left_hbox->add_child(title_bar_logo);
 		title_bar_logo->connect(SceneStringName(pressed), callable_mp(this, &ProjectManager::_show_about));

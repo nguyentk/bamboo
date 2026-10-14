@@ -270,10 +270,12 @@ def detect_modules(search_path, recursive=False):
 
     def is_engine(path):
         # Prevent recursively detecting modules in self and other
+        # BAMBOO: Bamboo rebranding: binary prefix from version.py and Bamboo engine detection.
         # Godot (or Bamboo) sources when using `custom_modules` build option.
         version_path = os.path.join(path, "version.py")
         if os.path.exists(version_path):
             with open(version_path, "r", encoding="utf-8") as f:
+                # BAMBOO: Bamboo rebranding: binary prefix from version.py and Bamboo engine detection.
                 content = f.read()
                 if 'short_name = "godot"' in content or 'short_name = "bamboo"' in content:
                     return True
@@ -1243,6 +1245,7 @@ def generate_vs_project(env, original_args, project_name="godot"):
     others_active = []
 
     get_dependencies(
+        # BAMBOO: Bamboo rebranding: binary prefix from version.py and Bamboo engine detection.
         env.File(f"#bin/{env.binary_prefix}{env['PROGSUFFIX']}"),
         env,
         extensions,
@@ -1309,6 +1312,7 @@ def generate_vs_project(env, original_args, project_name="godot"):
             properties.append(
                 "<ActiveProjectItemList_%s>;%s;</ActiveProjectItemList_%s>" % (x, ";".join(itemlist[x]), x)
             )
+        # BAMBOO: Bamboo rebranding: binary prefix from version.py and Bamboo engine detection.
         output = os.path.join("bin", f"{env.binary_prefix}{env['PROGSUFFIX']}")
 
         # The modules_enabled.gen.h header containing the defines is only generated on build, and only for the most recently built

@@ -58,6 +58,7 @@ import gles3_builders
 import glsl_builders
 import methods
 import scu_builders
+# BAMBOO: Output binary prefix / VS solution name come from version.py (env.binary_prefix).
 import version
 from misc.utility.color import is_stderr_color, print_error, print_info, print_warning
 from platform_methods import architecture_aliases, architectures, compatibility_platform_aliases
@@ -273,6 +274,7 @@ opts.Add(BoolVariable("werror", "Treat compiler warnings as errors", False))
 opts.Add("extra_suffix", "Custom extra suffix added to the base filename of all generated binary files", "")
 opts.Add("object_prefix", "Custom prefix added to the base filename of all generated object files", "")
 opts.Add(BoolVariable("vsproj", "Generate a Visual Studio solution", False))
+# BAMBOO: Output binary prefix / VS solution name come from version.py (env.binary_prefix).
 opts.Add("vsproj_name", "Name of the Visual Studio solution", version.short_name)
 opts.Add("import_env_vars", "A comma-separated list of environment variables to copy from the outer environment.", "")
 opts.Add(BoolVariable("disable_exceptions", "Force disabling exception handling code", True))

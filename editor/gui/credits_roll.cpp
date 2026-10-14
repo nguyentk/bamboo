@@ -237,6 +237,7 @@ void CreditsRoll::roll_credits() {
 		_create_label(String::utf8(GODOT_LICENSE_TEXT));
 
 		_create_nothing(400 * EDSCALE);
+		// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 		_create_label(TTRC("Thank you for choosing Bamboo Engine!"), LabelSize::BIG_HEADER);
 	}
 	// Needs to be set here, otherwise the starting position will be incorrect.

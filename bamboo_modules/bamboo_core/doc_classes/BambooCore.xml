@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="BambooCore" inherits="Object" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+	<brief_description>
+		Bamboo Engine product information.
+	</brief_description>
+	<description>
+		Singleton exposing the Bamboo product version, which is independent from the Godot base version reported by [method Engine.get_version_info].
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_codename" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the codename of the current Bamboo release line, e.g. [code]"Sprout"[/code].
+			</description>
+		</method>
+		<method name="get_godot_base_version" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the Godot base version this Bamboo build is based on, e.g. [code]"4.8.dev"[/code].
+			</description>
+		</method>
+		<method name="get_version_info" qualifiers="const">
+			<return type="Dictionary" />
+			<description>
+				Returns a dictionary with the keys [code]major[/code], [code]minor[/code], [code]patch[/code], [code]prerelease[/code], [code]codename[/code], [code]string[/code] and [code]godot_base[/code].
+			</description>
+		</method>
+		<method name="get_version_string" qualifiers="const">
+			<return type="String" />
+			<description>
+				Returns the Bamboo version string, e.g. [code]"0.1.0-alpha.1"[/code].
+			</description>
+		</method>
+	</methods>
+</class>

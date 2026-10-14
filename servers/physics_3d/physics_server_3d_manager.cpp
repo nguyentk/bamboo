@@ -54,9 +54,15 @@ void PhysicsServer3DManager::finalize_server_manager() {
 void PhysicsServer3DManager::initialize_server() {
 #ifndef PHYSICS_3D_DISABLED
 	/// 3D Physics Server
-	physics_server_3d = PhysicsServer3DManager::get_singleton()->new_server(
-			GLOBAL_GET(PhysicsServer3DManager::setting_property_name));
+	const String requested_server = GLOBAL_GET(PhysicsServer3DManager::setting_property_name);
+	physics_server_3d = PhysicsServer3DManager::get_singleton()->new_server(requested_server);
 	if (!physics_server_3d) {
+		// BAMBOO: Warn when the project asks for a 3D physics engine that is not part of this build
+		// (e.g. "Jolt Physics" with a build profile that disables the module), instead of silently
+		// switching engines.
+		if (requested_server != "DEFAULT") {
+			WARN_PRINT(vformat("3D physics engine \"%s\" (set in the %s project setting) is not available in this build. Falling back to the default 3D physics engine.", requested_server, PhysicsServer3DManager::setting_property_name));
+		}
 		// Physics server not found, Use the default physics
 		physics_server_3d = PhysicsServer3DManager::get_singleton()->new_default_server();
 	}

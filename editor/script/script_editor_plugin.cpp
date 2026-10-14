@@ -4385,6 +4385,7 @@ ScriptEditor::ScriptEditor(const String &p_config_section, const String &p_cache
 
 	disk_changed = memnew(ConfirmationDialog);
 	{
+		// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 		disk_changed->set_title(TTRC("Files have been modified outside Bamboo"));
 
 		VBoxContainer *vbc = memnew(VBoxContainer);

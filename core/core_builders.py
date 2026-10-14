@@ -30,6 +30,7 @@ def version_info_builder(target, source, env):
 #define GODOT_VERSION_WEBSITE "{website}"
 #define GODOT_VERSION_DOCS_BRANCH "{docs_branch}"
 #define GODOT_VERSION_DOCS_URL "https://docs.godotengine.org/en/" GODOT_VERSION_DOCS_BRANCH
+// BAMBOO: Bamboo product version (see bamboo_* in version.py).
 #define BAMBOO_VERSION_MAJOR {bamboo_major}
 #define BAMBOO_VERSION_MINOR {bamboo_minor}
 #define BAMBOO_VERSION_PATCH {bamboo_patch}

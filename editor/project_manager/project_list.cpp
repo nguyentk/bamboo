@@ -315,10 +315,13 @@ void ProjectListItemControl::set_unsupported_features(PackedStringArray p_featur
 				}
 
 				if (version_match_type != VersionMatchType::PROJECT_USES_SAME) {
+					// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 					String project_version_tooltip_text = TTR("This project was last edited in a different Bamboo version: ") + p_features[i] + "\n";
 					if (version_match_type == VersionMatchType::PROJECT_USES_OLDER_MAJOR || version_match_type == VersionMatchType::PROJECT_USES_OLDER_MINOR) {
+						// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 						project_version_tooltip_text += vformat(TTR("Opening it will upgrade it to Bamboo %s.%s."), GODOT_VERSION_MAJOR, GODOT_VERSION_MINOR) + "\n";
 					} else if (version_match_type == VersionMatchType::PROJECT_USES_NEWER_MAJOR || version_match_type == VersionMatchType::PROJECT_USES_NEWER_MINOR) {
+						// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 						project_version_tooltip_text += vformat(TTR("Opening it will downgrade it to Bamboo %s.%s."), GODOT_VERSION_MAJOR, GODOT_VERSION_MINOR) + "\n";
 						project_version_tooltip_text += TTR("Downgrading projects is not recommended.") + "\n";
 					}
@@ -331,6 +334,7 @@ void ProjectListItemControl::set_unsupported_features(PackedStringArray p_featur
 			} else {
 				if (p_features[i] == "3.x") {
 					version_match_type = VersionMatchType::PROJECT_USES_OLDER_MAJOR;
+					// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 					String project_version_tooltip_text = TTR("This project was last edited in a different Bamboo version: ") + p_features[i] + "\n";
 					project_version_tooltip_text += vformat(TTR("Opening it will upgrade it to Bamboo %s.%s."), GODOT_VERSION_MAJOR, GODOT_VERSION_MINOR) + "\n";
 					project_different_version->set_focus_mode(FOCUS_ACCESSIBILITY);
@@ -352,6 +356,7 @@ void ProjectListItemControl::set_unsupported_features(PackedStringArray p_featur
 		// a proper version number, it will be displayed alongside the "unknown version"
 		// warning otherwise.
 		if (unknown_version) {
+			// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 			tooltip_text += TTR("This project uses an unknown version of Bamboo.") + "\n";
 		}
 		if (p_features.size() > 0) {

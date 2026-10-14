@@ -214,6 +214,7 @@ Label *EditorAbout::_create_section(Control *p_parent, const String &p_name, con
 }
 
 EditorAbout::EditorAbout() {
+	// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 	set_title(TTRC("About Bamboo Engine"));
 	set_hide_on_ok(true);
 
@@ -309,6 +310,7 @@ EditorAbout::EditorAbout() {
 	license_thirdparty->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	tc->add_child(license_thirdparty);
 
+	// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 	Label *tpl_label = memnew(Label(TTRC("Bamboo Engine, like the Godot Engine it is based on, relies on a number of third-party free and open source libraries, all compatible with the terms of its MIT license. The following is an exhaustive list of all such third-party components with their respective copyright statements and license terms.")));
 	tpl_label->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	tpl_label->set_h_size_flags(Control::SIZE_EXPAND_FILL);

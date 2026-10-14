@@ -291,6 +291,7 @@ void EditorDockManager::_open_dock_in_window(EditorDock *p_dock, bool p_show_win
 	Point2 dock_screen_pos = floating_rect.position;
 
 	WindowWrapper *wrapper = memnew(WindowWrapper);
+	// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 	wrapper->set_window_title(vformat(TTR("%s - Bamboo Engine"), TTR(p_dock->get_display_title())));
 	wrapper->set_margins_enabled(true);
 

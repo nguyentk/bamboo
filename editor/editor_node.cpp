@@ -2152,6 +2152,7 @@ void EditorNode::_dialog_display_load_error(String p_file, Error p_error) {
 				show_warning(vformat(TTR("Missing file '%s' or one of its dependencies."), p_file.get_file()));
 			} break;
 			case ERR_FILE_UNRECOGNIZED: {
+				// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 				show_warning(vformat(TTR("File '%s' is saved in a format that is newer than the formats supported by this version of Bamboo, so it can't be opened."), p_file.get_file()));
 			} break;
 			default: {
@@ -6095,6 +6096,7 @@ String EditorNode::_get_system_info() const {
 	}
 	const String distribution_version = OS::get_singleton()->get_version_alias();
 
+	// BAMBOO: Use the engine name from version.py in the system info string.
 	String godot_version = String(GODOT_VERSION_NAME) + " v" + String(GODOT_VERSION_FULL_CONFIG);
 	if (String(GODOT_VERSION_BUILD) != "official") {
 		String hash = String(GODOT_VERSION_HASH);
@@ -9131,6 +9133,7 @@ EditorNode::EditorNode() {
 	ED_SHORTCUT_AND_COMMAND("editor/report_a_bug", TTRC("Report a Bug"));
 	ED_SHORTCUT_AND_COMMAND("editor/suggest_a_feature", TTRC("Suggest a Feature"));
 	ED_SHORTCUT_AND_COMMAND("editor/send_docs_feedback", TTRC("Send Docs Feedback"));
+	// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 	ED_SHORTCUT_AND_COMMAND("editor/about", TTRC("About Bamboo Engine..."));
 	ED_SHORTCUT_AND_COMMAND("editor/support_development", TTRC("Support Godot Development"));
 
@@ -9448,6 +9451,7 @@ EditorNode::EditorNode() {
 
 	disk_changed = memnew(ConfirmationDialog);
 	{
+		// BAMBOO: Rebranded user-facing string (Godot -> Bamboo).
 		disk_changed->set_title(TTR("Files have been modified outside Bamboo"));
 
 		VBoxContainer *vbc = memnew(VBoxContainer);
