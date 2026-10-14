@@ -2544,7 +2544,7 @@ msgstr "%s (đã tồn tại)"
 
 msgid "%d file conflicts with your project and won't be installed"
 msgid_plural "%d files conflict with your project and won't be installed"
-msgstr[0] "Tệp xung đột với dự án của bạn và sẽ không được cài đặt"
+msgstr[0] "%d tệp xung đột với dự án của bạn và sẽ không được cài đặt"
 
 msgid "This asset doesn't have a root directory, so it can't be ignored."
 msgstr "Tài sản này không có thư mục gốc nên không thể bỏ qua."
@@ -8242,7 +8242,7 @@ msgstr "Khóa/Mở khóa Tỷ lệ các Thành phần (Ratio)"
 
 msgid "This %s is used in %d place."
 msgid_plural "This %s is used in %d places."
-msgstr[0] "Lớp này được đánh dấu là không dùng nữa."
+msgstr[0] "%s này được dùng ở %d vị trí."
 
 msgid "This %s is external to scene."
 msgstr "%s này nằm bên ngoài scene."
@@ -20285,9 +20285,7 @@ msgid "> Starting Gradle build..."
 msgstr "> Đang bắt đầu quá trình xây dựng Gradle..."
 
 msgid "Failed to execute Gradle command"
-msgstr ""
-"Không thể thực thi lệnh Gradle \"%s\":\n"
-"%s."
+msgstr "Không thể thực thi lệnh Gradle."
 
 msgid "> Copying Gradle artifacts..."
 msgstr "> Đang sao chép các tệp tạo tác Gradle..."

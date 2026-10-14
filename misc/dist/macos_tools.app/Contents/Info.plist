@@ -4,10 +4,11 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<!-- BAMBOO: Rebranded bundle name and executable (Godot -> Bamboo). -->
 	<key>CFBundleExecutable</key>
-	<string>Godot</string>
+	<string>Bamboo</string>
 	<key>CFBundleName</key>
-	<string>Godot</string>
+	<string>Bamboo</string>
 	<key>CFBundleIconFile</key>
 	<string>GodotLG.icns</string>
 	<key>CFBundleIconName</key>

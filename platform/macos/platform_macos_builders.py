@@ -13,6 +13,7 @@ def generate_bundle(target, source, env):
 
     if env.editor_build:
         # Editor bundle.
+        # BAMBOO: Output binary prefix / VS solution name come from version.py (env.binary_prefix).
         prefix = env.binary_prefix + "." + env["platform"] + "." + env["target"]
         if env.dev_build:
             prefix += ".dev"
@@ -42,7 +43,8 @@ def generate_bundle(target, source, env):
         if not os.path.isdir(app_dir + "/Contents/MacOS"):
             os.mkdir(app_dir + "/Contents/MacOS")
         if target_bin != "":
-            shutil.copy(target_bin, app_dir + "/Contents/MacOS/Godot")
+            # BAMBOO: Bundle executable renamed to match CFBundleExecutable in editor_info_plist.template.
+            shutil.copy(target_bin, app_dir + "/Contents/MacOS/Bamboo")
         if "mono" in env.module_version_string:
             shutil.copytree(env.Dir("#bin/GodotSharp").abspath, app_dir + "/Contents/Resources/GodotSharp")
         version = get_version_info("", True)
@@ -75,6 +77,7 @@ def generate_bundle(target, source, env):
 
     else:
         # Template bundle.
+        # BAMBOO: Output binary prefix / VS solution name come from version.py (env.binary_prefix).
         app_prefix = env.binary_prefix + "." + env["platform"]
         rel_prefix = env.binary_prefix + "." + env["platform"] + "." + "template_release"
         dbg_prefix = env.binary_prefix + "." + env["platform"] + "." + "template_debug"
