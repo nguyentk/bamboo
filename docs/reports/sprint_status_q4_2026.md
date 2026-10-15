@@ -1,4 +1,4 @@
-# Bamboo Q4/2026 — Trạng thái thực hiện các prompt `.prompts/` (cập nhật 14/10/2026, beta.1)
+# Bamboo Q4/2026 — Trạng thái thực hiện các prompt `.prompts/` (cập nhật 15/10/2026, rc.1)
 
 > Tổng hợp kết quả thực hiện các task trong `.prompts/0.1.0-alpha.1` → `.prompts/0.1.0`, đối chiếu từng tiêu chí DoD với bằng chứng thật.
 > Môi trường: macOS (Apple M4), Xcode/Apple Clang 21, SCons 4.11. Ký hiệu: ✅ đạt · ⚠️ đạt một phần · ⛔ chưa làm được (thiếu tài nguyên/quyền) · ⏸ cố ý chưa làm (mốc phát hành).
@@ -70,15 +70,17 @@
 | GAME: PC ≥60 FPS, không rò rỉ bộ nhớ 15 phút | ✅ | soak 900 s: +0,051 MiB/phút; 60 FPS (VSync) |
 | TL: cắt `release/0.1`, tag, branch protection | ⏸ | Cần commit công việc hiện tại trước (162+ file chưa commit) + quyền push |
 
-## Sprint 5 — `0.1.0`
+## Sprint 5 — `0.1.0` (cập nhật 15/10/2026)
 
 | Task / DoD | Trạng thái | Bằng chứng |
 | :--- | :---: | :--- |
-| ALL: 0 P0, full regression | ⚠️ | Full C++ suite pass; `check_open_issues.py` cần token/repo để đếm issue thật |
-| BQ: `package_macos.sh`, `package_release.py`, SHA256SUMS + test | ⚠️ | `bin/Bamboo_v0.1.0-alpha.1_macOS.dmg` (ad-hoc) + `.tpz` + `bin/release/SHA256SUMS.txt` (kiểm tra OK); bundle đổi tên `Bamboo` (CFBundleName/Executable); **notarization cần Apple Developer ID**; gói Windows/Linux cần CI |
-| TLS: `editor.pot` (6 640 chuỗi) + test + Migration Guide | ✅ | `msgfmt --check` pass; `docs/unity_port/Unity_to_Bamboo_Migration_Guide.md` |
-| TL: release notes, readiness test, Go/No-go | ⚠️ | Release notes **bản nháp**; `release_readiness.py`: 4/9 tiêu chí tự động đạt, **NO-GO** (thiếu bằng chứng CI/P0/thiết bị, DMG chưa notarize) |
-| TL: `bamboo_prerelease = ""`, tag `bamboo-v0.1.0`, push | ⏸ | Không thực hiện — chưa đạt 9 tiêu chí |
+| ALL: rà soát P0/P1 | ⚠️ | GitHub Issues **đang tắt** → không xác minh được; `check_open_issues.py` giờ báo rõ thay vì "0" (BAMBOO-101). Bug bash: 0 P0/P1 |
+| ALL: full regression + benchmark | ✅ | C++ 1436/1436, `[Regression]` pass; RAM 0% so với beta.1, FPS trong nhiễu (ngưỡng 1% < độ nhiễu đo) |
+| BQ: `.dmg`, `.zip`, `.tpz`, `SHA256SUMS.txt` + test | ⚠️ | Đủ cho macOS/Windows (`bin/release/`, checksum OK); **chưa notarize** (thiếu Developer ID); Linux `.tar.xz` cần CI |
+| TLS: `.pot` đồng bộ + test + Migration Guide | ✅ | 6 641 chuỗi, không đổi so với mã nguồn; hướng dẫn đủ 9 chương |
+| TL: `0.1.0-rc.1` + CI | ⚠️ | rc.1 build và kiểm thử tại máy; CI của rc.1 chạy sau khi push |
+| TL: Go/No-go | ✅ (họp) / ❌ (GO) | **NO-GO** 6/9: `docs/reports/go_nogo/go_nogo_0.1.0.md` |
+| TL: `bamboo_prerelease = ""`, tag `bamboo-v0.1.0` | ⏸ | Không thực hiện vì NO-GO |
 
 ## Việc cần người/quyền bên ngoài để đóng các mục còn lại
 

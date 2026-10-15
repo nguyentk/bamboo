@@ -1,0 +1,20 @@
+{
+  "ci_green": {
+    "ok": true,
+    "evidence": "23/23 jobs green on Windows, macOS, Linux, Android, iOS and Web: release/0.1 @ 2c88d6317c https://github.com/nguyentk/bamboo/actions/runs/38547585335 and develop @ 2c88d6317c https://github.com/nguyentk/bamboo/actions/runs/38541240434 (rc.1 version bump must be re-run on CI after it is pushed)"
+  },
+  "zero_p0": {
+    "ok": false,
+    "evidence": "",
+    "note": "Cannot be verified: GitHub Issues are disabled on nguyentk/bamboo, so no P0 can be tracked (misc/scripts/check_open_issues.py exits 2). The automated bug bash found 0 P0/P1 (docs/reports/bug_bash_0.1.0-beta.1.md), but GUI and device testing were not covered."
+  },
+  "ci_build_time": {
+    "ok": true,
+    "evidence": "Cached build https://github.com/nguyentk/bamboo/actions/runs/38541240434: editor compilation 31-116 s per job (macOS 101 s x86_64 + 45 s arm64, whole macOS job 5.5 min); only the GCC/SCU sanitizer job (2457 s) had no cache yet."
+  },
+  "dogfood_devices": {
+    "ok": false,
+    "evidence": "",
+    "note": "PC (macOS): game_dogfood runs at 60 FPS, 15-minute soak without leak. Not run on a real Android device (no NDK 29 / device), and game_dogfood is a sample project, not the internal Unity game port required by the criterion."
+  }
+}

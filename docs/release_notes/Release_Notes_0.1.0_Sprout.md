@@ -1,8 +1,9 @@
 # Bamboo Engine 0.1.0 "Sprout" — Release Notes
 
-> **BẢN NHÁP (DRAFT)** — chưa phát hành. Phiên bản hiện tại trong `version.py`: `0.1.0-alpha.1`.
-> Ngày phát hành dự kiến: 18/12/2026 (sau Go/No-go 17/12). Kiểm tra điều kiện: `python3 misc/scripts/release_readiness.py --final`.
-> Các mục đánh dấu ⏳ chưa đạt tại thời điểm viết nháp.
+> **BẢN ỨNG VIÊN — CHƯA PHÁT HÀNH CHÍNH THỨC.** Phiên bản hiện tại: `0.1.0-rc.1` (nhánh `release/0.1`).
+> Họp Go/No-go 15/10/2026: **NO-GO** (6/9 tiêu chí) — xem [`docs/reports/go_nogo/go_nogo_0.1.0.md`](../reports/go_nogo/go_nogo_0.1.0.md).
+> Kiểm tra lại: `python3 misc/scripts/release_readiness.py --evidence docs/reports/go_nogo/evidence_0.1.0-rc.1.json --final`.
+> Các mục đánh dấu ⏳ chưa đạt.
 
 ## Giới thiệu
 
@@ -12,7 +13,7 @@ Bamboo Engine là engine game mã nguồn mở dựa trên **Godot Engine 4.8** 
 
 - **Dual-versioning bảo toàn GDExtension ABI** — phiên bản sản phẩm `0.1.0` song song với phiên bản Godot gốc `4.8`; `Engine.get_version_info()` có thêm các khóa `bamboo_*`; singleton `BambooCore` (module `bamboo_modules/bamboo_core`).
 - **Jolt Physics mặc định cho project mới**; project cũ giữ engine đã cấu hình; cảnh báo rõ ràng khi engine vật lý được yêu cầu không có trong bản build.
-- **3 build profile** (`profiles/`): 2D, Mobile, PC — template release macOS arm64: 58.9 MB (đầy đủ), 48.9 MB (2D, −17%), 47.8 MB (Mobile, −19%). Biến thể 2D tối giản (`optimize=size`, text server fallback, `deprecated=no`): 39.1 MB (−33.6%).
+- **3 build profile** (`profiles/`): 2D, Mobile, PC — template release macOS arm64: 58.9 MB (đầy đủ), 41.3 MB (2D, −30%), 47.8 MB (Mobile, −19%).
 - **Thư mục dữ liệu riêng** (`~/Library/Application Support/Bamboo`, `%APPDATA%\Bamboo`, `~/.local/share/bamboo`) — không đụng tới Godot cài sẵn.
 - **Công cụ chuyển đổi Unity** (`tools/unity_importer/`): khảo sát dự án, chuyển material (`.mat` → `.tres`), prefab → scene (`.tscn`) với chuyển hệ tọa độ; hướng dẫn [Unity → Bamboo](../unity_port/Unity_to_Bamboo_Migration_Guide.md).
 - **Chất lượng**: benchmark suite 6 kịch bản có baseline, golden-image test cho Forward+/Mobile/Compatibility, kiểm kê patch `// BAMBOO:` 100%, CI desktop/mobile/web với `BUILD_NAME=bamboo`.

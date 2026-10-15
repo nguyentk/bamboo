@@ -70,6 +70,7 @@ Môi trường: MacBook Air Apple M4, màn hình tích hợp + Dell P2217H, **c�
 | BB-2 | P3 | Forward+ (Metal) bỏ qua `--disable-vsync`: vẫn 60 FPS | `--print-fps`: 60 FPS cả khi tắt VSync | Upstream | Như BB-1 (ảnh hưởng benchmark GPU uncapped, không ảnh hưởng người chơi) |
 | BB-3 | P3 | Lần chạy đầu sau khi cài binary mới: frame đầu tiên 1,3 s (Forward+) | 1 287 ms khi chạy alpha.3 lần đầu; xóa cache shader của game chỉ còn 43 ms → do cache Metal của hệ điều hành | Upstream / hệ điều hành | Q1/2027: shader pre-warming khi khởi động (đúng hạng mục trong báo cáo parity) |
 | BB-4 | P3 | Compatibility mất ~200 ms biên dịch shader mỗi lần chạy (không có cache) | warm-up 200 ms cả khi cache "ấm" | Upstream | Theo dõi; ưu tiên Forward+/Mobile cho PC/Android |
+| BB-5 | P3 | `ERROR: Parameter "singleton" is null.` trong 1/31 lần export headless (rc.1, 15/10) | Export vẫn thành công, game chạy được; 30 lần chạy lại không tái hiện, không lấy được vị trí | Chưa rõ (vị trí khả dĩ: các `finalize_*` khi tắt engine) | Theo dõi trong CI/bug bash tiếp theo; lưu toàn bộ log khi xuất hiện |
 | B-1 | blocked | Export Linux chưa kiểm tra | Thiếu template Linux (cần CI) | — | Chạy lại sau khi CI sinh template Linux |
 | B-2 | blocked | Export / chạy Android chưa kiểm tra | Thiếu NDK 29 + template Android + thiết bị | — | Cần cài NDK và thiết bị Android tầm trung |
 

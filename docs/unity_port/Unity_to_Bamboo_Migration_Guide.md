@@ -190,7 +190,7 @@ Export templates Bamboo được cài từ file `.tpz` (Editor → Manage Export
 | Profile | Dùng cho | Template release macOS arm64 (đo thực tế) |
 | :--- | :--- | :--- |
 | Mặc định / `bamboo_pc` | Game PC đầy đủ tính năng | 58.9 MB |
-| `bamboo_2d` | Game 2D (bỏ 3D, vật lý/navigation 3D, XR) | 48.9 MB (−17%) |
+| `bamboo_2d` | Game 2D (bỏ 3D, vật lý/navigation 3D, XR; `-Os`) | 41.3 MB (−30%) |
 | `bamboo_mobile` | Android/iOS (`-Os`, bỏ XR/WebRTC/raycast) | 47.8 MB (−19%) |
 
 Build template theo profile:
