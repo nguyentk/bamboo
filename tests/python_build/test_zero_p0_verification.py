@@ -68,6 +68,29 @@ class TestIssueFiltering(unittest.TestCase):
             self.assertEqual(code, 0)
 
 
+class TestGitHubAccess(unittest.TestCase):
+    def setUp(self):
+        self.original = coi.github_get
+
+    def tearDown(self):
+        coi.github_get = self.original
+
+    def test_disabled_issues_cannot_prove_zero_p0(self):
+        coi.github_get = lambda path: {"has_issues": False} if path == "repos/o/r" else []
+        with redirect_stderr(StringIO()) as err, redirect_stdout(StringIO()):
+            code = coi.main(["--priority", "P0", "--repo", "o/r", "--fail-if-open"])
+        self.assertEqual(code, 2)
+        self.assertIn("Issues are disabled", err.getvalue())
+
+    def test_enabled_issues_are_counted(self):
+        issue = {"number": 7, "title": "Crash", "state": "open", "labels": [{"name": "P0-Blocker"}]}
+        coi.github_get = lambda path: {"has_issues": True} if path == "repos/o/r" else [issue]
+        with redirect_stdout(StringIO()) as out:
+            code = coi.main(["--priority", "P0", "--repo", "o/r", "--fail-if-open"])
+        self.assertEqual(code, 1)
+        self.assertIn("#7 Crash", out.getvalue())
+
+
 class TestTicketReferences(unittest.TestCase):
     def test_commits_must_reference_a_ticket(self):
         subjects = [

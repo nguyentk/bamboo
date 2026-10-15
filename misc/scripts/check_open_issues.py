@@ -17,6 +17,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Optional, Sequence
@@ -64,17 +65,40 @@ def repo_from_git_remote() -> Optional[str]:
     return match.group(1) if match else None
 
 
-def fetch_issues(repo: str, labels: Sequence[str]) -> list[dict[str, Any]]:
+def github_get(path: str) -> Any:
+    """GET a GitHub REST API path. Falls back to `curl` when Python has no CA certificates (SSL error)."""
+    url = f"https://api.github.com/{path}"
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    headers = {"Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.load(response)
+    except urllib.error.URLError as e:
+        if "CERTIFICATE_VERIFY_FAILED" not in str(e):
+            raise
+    cmd = ["curl", "-sf", "--max-time", "30"]
+    for key, value in headers.items():
+        cmd += ["-H", f"{key}: {value}"]
+    try:
+        out = subprocess.run(cmd + [url], capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError) as e:
+        raise OSError(f"curl failed: {e}") from e
+    return json.loads(out)
+
+
+def issues_enabled(repo: str) -> bool:
+    """False when the repository has GitHub Issues disabled (the issues API then just returns [])."""
+    return bool(github_get(f"repos/{repo}").get("has_issues", True))
+
+
+def fetch_issues(repo: str, labels: Sequence[str]) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
     for label in labels:
         query = urllib.parse.urlencode({"state": "open", "labels": label, "per_page": 100})
-        request = urllib.request.Request(f"https://api.github.com/repos/{repo}/issues?{query}")
-        request.add_header("Accept", "application/vnd.github+json")
-        if token:
-            request.add_header("Authorization", f"Bearer {token}")
-        with urllib.request.urlopen(request, timeout=30) as response:
-            issues += json.load(response)
+        issues += github_get(f"repos/{repo}/issues?{query}")
     return issues
 
 
@@ -101,8 +125,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print("ERROR: cannot determine the GitHub repository; pass --repo owner/name.", file=sys.stderr)
             return 2
         try:
+            if not issues_enabled(repo):
+                # An empty issue list would look like "0 open P0" although nothing can be tracked.
+                print(
+                    f"ERROR: GitHub Issues are disabled for {repo}: open P0/P1 issues cannot be verified. "
+                    "Enable Issues (Settings -> General -> Features) or pass --from-json.",
+                    file=sys.stderr,
+                )
+                return 2
             issues = fetch_issues(repo, [PRIORITY_LABELS[p] for p in priorities])
-        except OSError as e:
+        except (OSError, ValueError) as e:
             print(
                 f"ERROR: cannot read issues from GitHub ({e}); set GITHUB_TOKEN for private repositories.",
                 file=sys.stderr,
